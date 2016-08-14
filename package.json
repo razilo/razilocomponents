@@ -1,0 +1,15 @@
+{
+  "name": "razilocomponents",
+  "version": "1.0.0",
+  "description": "ES6 web components built using raziloComponent.",
+  "author": "Paul Smith (smiffy6969)",
+  "homepage": "http://component.razilo.net",
+  "dependencies": {
+	"razilocomponent": "^1.0.0"
+	"font-awesome": "^4.6.1",
+  },
+  "devDependencies": {},
+  "browserify": {
+    "transform": [["babelify", { "presets": ["es2015-loose"] }]]
+  }
+}
