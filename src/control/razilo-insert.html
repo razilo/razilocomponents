@@ -1,0 +1,153 @@
+<!--
+* raziloComponents
+* razilo-insert - Form input with user feedback
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../base.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-insert { height: 30px; margin-bottom: 10px; display: inline-block; }
+	razilo-insert .-input-group { width: 100%; height: inherit; }
+	razilo-insert .-input-group input { width: inherit; height: inherit; box-sizing: border-box; padding: 2px 5px; border: 1px solid #888; outline: none; font-size: 15px; background: transparent; }
+	razilo-insert .-input-group input:focus:not([disabled]), razilo-insert .-input-group input:active:not([disabled]) { border-color: #444; }
+	razilo-insert .-input-group input[disabled] { cursor: not-allowed; border: 1px dashed #888; background-color: #fff; }
+	razilo-insert .-input-group input.error, razilo-insert .-input-group input.error:focus, razilo-insert .-input-group input.error:active { border-color: red; color: red; }
+	razilo-insert .-input-group .-input-error { position: absolute; color: red; font-size: 11px; line-height: 10px; }
+	razilo-insert .-input-group .-input-error razilo-icon, razilo-insert .-input-group .-input-error .-input-error-message { color: red; font-size: 11px; line-height: 10px}
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-insert">
+	<div class="-input-group">
+		<input
+			bind-attributes="{'name': name, 'type': type, 'disabled': disabled, 'required': required, 'placeholder': placeholder}"
+			bind-value="value"
+			bind-event="{'input': onInputChanged(), 'keypress': onKeyPressed()}"
+		/>
+		<div class="-input-error" bind-show="validateFail">
+			<razilo-icon name="warning"></razilo-icon>
+			<span class="-input-error-message" bind-text="validateMessage"></span>
+		</div>
+		<div class="-input-error" bind-show="matchFail">
+			<razilo-icon name="info"></razilo-icon>
+			<span class="-input-error-message" bind-text="matchMessage"></span>
+		</div>
+	</div>
+</template>
+
+<!-- LOGIC -->
+<script>
+	// build scope
+	new RaziloComponent('razilo-insert', {
+		value: '',
+		error: false,
+		name: '',
+		type: '',
+		disabled: false,
+		placeholder: '',
+		required: false,
+		validate: '',
+		validateMessage: 'Fails validation',
+		validateFail: false,
+		match: '',
+		matchMessage: 'Does not match',
+		machFail: false,
+
+		attached: function()
+		{
+			// Initial setup
+			if (this.getHost().hasAttribute('name')) this.name = this.getHost().getAttribute('name');
+			if (this.getHost().hasAttribute('type')) this.type = this.getHost().getAttribute('type');
+			if (this.getHost().value || this.getHost().hasAttribute('value')) this.value = this.getHost().value || this.getHost().getAttribute('value');
+			if (this.getHost().hasAttribute('disabled')) this.disabled = true;
+			if (this.getHost().hasAttribute('placeholder')) this.placeholder = this.getHost().getAttribute('placeholder');
+			if (this.getHost().hasAttribute('required')) this.required = true;
+			if (this.getHost().hasAttribute('validate')) this.validate = this.getHost().getAttribute('validate');
+			if (this.getHost().hasAttribute('validate-message')) this.validateMessage = this.getHost().getAttribute('validate-message');
+			if (this.getHost().hasAttribute('match')) this.match = this.getHost().getAttribute('match');
+			if (this.getHost().hasAttribute('match-message')) this.matchMessage = this.getHost().getAttribute('match-message');
+
+			// force check on start if error set
+			if (this.getHost().hasAttribute('error')) this.checkError(this.value);
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			switch (name)
+			{
+				case 'name':
+				case 'type':
+				case 'placeholder':
+				case 'validate':
+					this[name] = newVal;
+				break;
+				case 'value':
+					this.value = this.getHost().value || newVal;
+				break;
+				case 'disabled':
+				case 'required':
+				case 'match':
+					this[name] = true;
+				break;
+				case 'match-message':
+					this.matchMessage = newVal;
+				break;
+				case 'validate-message':
+					this.validateMessage = newVal;
+				break;
+				case 'error':
+					this.checkError(this.value);
+				break;
+			}
+		},
+
+		onInputChanged: function(ev)
+		{
+			this.checkError(this.value);
+			this.getHost().value = this.value; // have to push changes to host value too for data binders
+			this.fireEvent('change');
+		},
+
+		onKeyPressed: function(ev)
+		{
+			this.fireEvent('keypress', ev);
+		},
+
+		checkError: function(value)
+		{
+			this.error = false;
+			if (!this.validate && !this.match) return;
+
+			// validate input
+			var regexp = new RegExp(this.validate);
+			this.validateFail = !regexp.test(value);
+
+			if (this.validateFail)
+			{
+				this.error = true;
+				this.getHost().setAttribute('error', '');
+				this.fireEvent('error', this.validateMessage);
+				return;
+			}
+
+			// validate match
+			if (this.match != null && this.match != value)
+			{
+				this.validateMatch = true;
+				this.error = true;
+				this.getHost().setAttribute('error', '');
+				this.fireEvent('error', this.matchMessage);
+			}
+			else
+			{
+			 	this.getHost().removeAttribute('error');
+				this.validateMatch = false;
+			}
+		}
+	});
+</script>

@@ -1,0 +1,65 @@
+<!--
+* raziloComponents
+* razilo-error - As we dont need forms in JS ui, this houses controls for error compilation
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-error', {
+		value: 0,
+		matches: [],
+
+		attached: function()
+		{
+			this.addMatches();
+		},
+
+		detached: function()
+		{
+			this.removeMatches();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			if (name == 'value' && this.value != newVal) this.value = parseInt(newVal);
+
+			if (name == 'refresh' && newVal != oldVal)
+			{
+				this.removeMatches();
+				this.addMatches();
+			}
+		},
+
+		addMatches: function()
+		{
+			this.matches = this.getHost().querySelectorAll('input, razilo-insert, select, razilo-choose, textarea, razilo-date-picker, razilo-time-picker');
+			for (var i = 0; i < this.matches.length; i++) this.matches[i].addEventListener('change', this.checkError.bind(this));
+		},
+
+		removeMatches: function()
+		{
+			for (var i = 0; i < this.matches.length; i++) this.matches[i].removeEventListener('change', this.checkError.bind(this));
+		},
+
+		checkError: function(event)
+		{
+			var error = false;
+			for (var i = 0; i < this.matches.length; i++)
+			{
+				if (this.matches[i].hasAttribute('disabled')) continue;
+
+				var val = this.matches[i].value;
+				var err = this.matches[i].error || this.matches[i].hasAttribute('error');
+				if ((this.matches[i].hasAttribute('required') && !val) || err) error = true;
+			}
+
+			this.value = parseInt(error);
+			this.getHost().value = this.value;
+
+			this.fireEvent('change');
+		}
+	});
+</script>

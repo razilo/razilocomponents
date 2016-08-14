@@ -1,0 +1,155 @@
+<!--
+* raziloComponents
+* razilo-time-picker - For selecting dates
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../control.html">
+<link rel="import" href="../overlay.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-time-picker razilo-modal { width: 340px; left: 50%; margin-left: -170px; }
+	razilo-time-picker razilo-modal .-container .-controls { display: block; width: 100%; text-align: center; overflow: hidden; }
+	razilo-time-picker razilo-modal .-container .-controls .-tag-box { width: 150px; display: inline-block; padding: 2px; }
+	razilo-time-picker razilo-modal .-container .-controls .-tag-box button { margin-left: 8px; margin-right: 8px; }
+	razilo-time-picker razilo-modal .-container .-controls .-close { position: absolute; right: 40px; }
+	razilo-time-picker razilo-modal .-container .-controls .-close:hover { opacity: 1; }
+	razilo-time-picker razilo-modal .-container .-frame { position: relative; }
+	razilo-time-picker razilo-modal .-container .-frame .-time { font-family: monospace; font-size: 30px; font-weight: bold; text-align: center; padding: 20px; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-time-picker">
+	<razilo-modal bind-attributes="{'show': showModal, 'color': color}">
+		<main>
+			<div class="-container">
+		        <div class="-controls -above">
+					<div class="-tag-box">
+						<button is="razilo-button" bind-show="showHour" size="medium" shape="round" color="grey" bind-event="{'click': setHour('1')}"><razilo-icon name="chevron-up"></razilo-icon></button>
+						<button is="razilo-button" bind-show="showMin" size="medium" shape="round" color="grey" bind-event="{'click': setMin('1')}"><razilo-icon name="chevron-up"></razilo-icon></button>
+						<button is="razilo-button" bind-show="showSec" size="medium" shape="round" color="grey" bind-event="{'click': setSec('1')}"><razilo-icon name="chevron-up"></razilo-icon></button>
+					</div>
+					<button is="razilo-button" class="-close" shape="round" color="red" size="medium" bind-event="{'click': hide()}"><razilo-icon name="times"></razilo-icon></button>
+		        </div>
+				<div class="-frame">
+					<div class="-time">
+						<span bind-text="value" alter-text="{'date': format}"></span>
+					</div>
+				</div>
+		        <div class="-controls -below">
+					<div class="-tag-box">
+						<button is="razilo-button" bind-show="showHour" size="medium" shape="round" color="grey" bind-event="{'click': setHour('-1')}"><razilo-icon name="chevron-down"></razilo-icon></button>
+						<button is="razilo-button" bind-show="showMin" size="medium" shape="round" color="grey" bind-event="{'click': setMin('-1')}"><razilo-icon name="chevron-down"></razilo-icon></button>
+						<button is="razilo-button" bind-show="showSec" size="medium" shape="round" color="grey" bind-event="{'click': setSec('-1')}"><razilo-icon name="chevron-down"></razilo-icon></button>
+					</div>
+					<button is="razilo-button" class="-close" shape="round" color="green" size="medium" bind-event="{'click': selectTime()}"><razilo-icon name="check"></razilo-icon></button>
+		        </div>
+			</div>
+		</main>
+	</razilo-modal>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-time-picker', {
+		showModal: false,
+		format: 'HH:MM',
+		color: 'white',
+
+		value: new Date(),
+
+		showHour: true,
+		showMin: true,
+		showSec: true,
+
+		attached: function ()
+		{
+			this.format = this.getHost().getAttribute('format') || this.format;
+			this.color = this.getHost().getAttribute('color') || this.color;
+			this.setFormat();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			switch (name)
+			{
+				case 'value':
+					this.updateValue(this.getHost().value || newVal);
+				break;
+				case 'format':;
+					this.format = newVal || 'HH:MM';
+					this.setFormat();
+				break;
+				case 'color':
+					this.color = newVal;
+				break;
+				case 'show':
+					if (newVal === null) this.showModal = false;
+					else
+					{
+						var val = this.getHost().value;
+						if (!val)
+						{
+							val = this.getHost().getAttribute('value');
+							if (val && val.indexOf('object') >= 0) val = null;
+						}
+
+						this.showModal = true;
+						this.updateValue(this.getHost().value);
+					}
+				break;
+			}
+		},
+
+		updateValue: function(val)
+		{
+			if (val instanceof Date) this.value = new Date(val);
+			else if (!isNaN(val) && val != null) this.value = new Date(val);
+			else if (typeof val === 'string') this.value = new Date(Date.parse(val))
+			else this.value = new Date();
+		},
+
+		setFormat: function ()
+		{
+			this.showHour = this.format.indexOf('h') >= 0 || this.format.indexOf('H') >= 0 ? true : false;
+			this.showMin = this.format.indexOf('m') >= 0 || this.format.indexOf('M') >= 0 ? true : false;
+			this.showSec = this.format.indexOf('s') >= 0 || this.format.indexOf('S') >= 0 ? true : false;
+		},
+
+		show: function()
+		{
+			this.getHost().setAttribute('show', '');
+		},
+
+		hide: function()
+		{
+			this.getHost().removeAttribute('show');
+		},
+
+		setHour: function(ev, val)
+		{
+			this.value = new Date(this.value.setHours(this.value.getHours() + parseInt(val)));
+		},
+
+		setMin: function(ev, val)
+		{
+			this.value = new Date(this.value.setMinutes(this.value.getMinutes() + parseInt(val)));
+		},
+
+		setSec: function(ev, val)
+		{
+			this.value = new Date(this.value.setSeconds(this.value.getSeconds() + parseInt(val)));
+		},
+
+		selectTime: function(ev)
+		{
+			this.getHost().removeAttribute('show');
+			this.getHost().value = this.value;
+			this.fireEvent('change');
+		}
+	});
+</script>

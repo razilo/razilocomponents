@@ -1,0 +1,39 @@
+<!--
+* raziloComponents
+* razilo-icon - Displays a selectable icon using embedded fontawesome icons.
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- LOGIC -->
+<script>
+    new RaziloComponent('razilo-icon', {
+		attached: function () {
+			// Initial setup
+	        if (this.getHost().className.indexOf('fa') >= 0) return;
+	    	this.addClasses();
+		},
+		attributeChanged: function(name, oldVal, newVal) {
+	    	if (!newVal || ['name', 'size', 'rotate', 'stack', 'flip', 'fw', 'spin', 'pulse', 'inverse', 'border'].indexOf(name) < 0) return;
+			this.addClasses();
+		},
+		addClasses: function() {
+	        var className = ' fa';
+	        var classes = this.getHost().className.split(' ');
+	        for (var i = 0; i < classes.length; i++) className += classes[i] == 'fa' || classes[i].trim().indexOf('fa-') == 0 ? '' : ' ' + classes[i];
+
+	        if (this.getHost().hasAttribute('name')) className += ' fa-' + this.getHost().getAttribute('name');
+	        if (this.getHost().hasAttribute('size')) className += ' fa-' + this.getHost().getAttribute('size') + 'x';
+	        if (this.getHost().hasAttribute('rotate')) className += ' fa-rotate-' + this.getHost().getAttribute('rotate');
+	        if (this.getHost().hasAttribute('stack')) className += ' fa-stack-' + this.getHost().getAttribute('stack') + 'x';
+	        if (this.getHost().hasAttribute('flip')) className += ' fa-flip-' + this.getHost().getAttribute('flip');
+	        if (this.getHost().hasAttribute('fw')) className += ' fa-fw';
+	        if (this.getHost().hasAttribute('spin')) className += ' fa-spin';
+	        if (this.getHost().hasAttribute('pulse')) className += ' fa-pulse';
+	        if (this.getHost().hasAttribute('inverse')) className += ' fa-inverse';
+	        if (this.getHost().hasAttribute('border')) className += ' fa-border';
+	        this.getHost().className = className.trim();
+	    }
+	});
+</script>

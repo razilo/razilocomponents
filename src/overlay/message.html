@@ -1,0 +1,101 @@
+<!--
+* raziloComponents
+* razilo-message - Overlay message for use as notification tool
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-message { padding: 20px; position: fixed; opacity: 0; display: none; width: 100%; left: 0px; top: 15%; text-align: center; z-index: 3010; }
+	razilo-message .-spacer { padding: 10px; text-align: center; background-color: #f4f4f4; color: #444; font-size: 14px; box-shadow: 0px 0px 30px 0px rgba(40, 40, 40, 0.61); }
+	@media (min-width: 500px) { razilo-message { width: 60%; left: 20%; } }
+	@media (min-width: 800px) { razilo-message { width: 50%; left: 25%; } }
+	@media (min-width: 1200px) { razilo-message { width: 40%; left: 30%; } }
+
+	razilo-message[animate-a] { display: block; -webkit-animation-name: -razilo-message-show-a; -webkit-animation-duration: 3s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-message-show-a; -moz-animation-duration: 3s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -ms-animation-name: -razilo-message-show-a; -ms-animation-duration: 3s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -o-animation-name: -razilo-message-show-a; -o-animation-duration: 3s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; animation-name: -razilo-message-show-a; animation-duration: 3s; animation-iteration-count: 1; animation-timing-function: linear; }
+	razilo-message[animate-b] { display: block; -webkit-animation-name: -razilo-message-show-b; -webkit-animation-duration: 3s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-message-show-b; -moz-animation-duration: 3s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -ms-animation-name: -razilo-message-show-b; -ms-animation-duration: 3s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -o-animation-name: -razilo-message-show-b; -o-animation-duration: 3s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; animation-name: -razilo-message-show-b; animation-duration: 3s; animation-iteration-count: 1; animation-timing-function: linear; }
+	razilo-message[delay="double"] { -webkit-animation-duration: 6s; -moz-animation-duration: 6s; -ms-animation-duration: 6s; -o-animation-duration: 6s; animation-duration: 6s; }
+	razilo-message[delay="triple"] { -webkit-animation-duration: 9s; -moz-animation-duration: 9s; -ms-animation-duration: 9s; -o-animation-duration: 9s; animation-duration: 9s; }
+	@-webkit-keyframes -razilo-message-show-a { 0% { opacity: 1; } 1% { -webkit-transform: translate(2px, 1px) rotate(0deg); } 2% { -webkit-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -webkit-transform: translate(-3px, 0px) rotate(1deg); } 4% { -webkit-transform: translate(0px, 2px) rotate(0deg); } 5% { -webkit-transform: translate(1px, -1px) rotate(1deg); } 6% { -webkit-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -webkit-transform: translate(-3px, 1px) rotate(0deg); } 8% { -webkit-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; }	}
+	@-webkit-keyframes -razilo-message-show-b {	0% { opacity: 1; } 1% { -webkit-transform: translate(2px, 1px) rotate(0deg); } 2% { -webkit-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -webkit-transform: translate(-3px, 0px) rotate(1deg); } 4% { -webkit-transform: translate(0px, 2px) rotate(0deg); } 5% { -webkit-transform: translate(1px, -1px) rotate(1deg); } 6% { -webkit-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -webkit-transform: translate(-3px, 1px) rotate(0deg); } 8% { -webkit-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; } }
+	@-moz-keyframes -razilo-message-show-a { 0% { opacity: 1; } 1% { -moz-transform: translate(2px, 1px) rotate(0deg); } 2% { -moz-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -moz-transform: translate(-3px, 0px) rotate(1deg); } 4% { -moz-transform: translate(0px, 2px) rotate(0deg); } 5% { -moz-transform: translate(1px, -1px) rotate(1deg); } 6% { -moz-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -moz-transform: translate(-3px, 1px) rotate(0deg); } 8% { -moz-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; }	}
+	@-moz-keyframes -razilo-message-show-b { 0% { opacity: 1; } 1% { -moz-transform: translate(2px, 1px) rotate(0deg); } 2% { -moz-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -moz-transform: translate(-3px, 0px) rotate(1deg); } 4% { -moz-transform: translate(0px, 2px) rotate(0deg); } 5% { -moz-transform: translate(1px, -1px) rotate(1deg); } 6% { -moz-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -moz-transform: translate(-3px, 1px) rotate(0deg); } 8% { -moz-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; } }
+	@-ms-keyframes -razilo-message-show-a { 0% { opacity: 1; } 1% { -ms-transform: translate(2px, 1px) rotate(0deg); } 2% { -ms-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -ms-transform: translate(-3px, 0px) rotate(1deg); } 4% { -ms-transform: translate(0px, 2px) rotate(0deg); } 5% { -ms-transform: translate(1px, -1px) rotate(1deg); } 6% { -ms-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -ms-transform: translate(-3px, 1px) rotate(0deg); } 8% { -ms-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; }	}
+	@-ms-keyframes -razilo-message-show-b {	0% { opacity: 1; } 1% { -ms-transform: translate(2px, 1px) rotate(0deg); } 2% { -ms-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -ms-transform: translate(-3px, 0px) rotate(1deg); } 4% { -ms-transform: translate(0px, 2px) rotate(0deg); } 5% { -ms-transform: translate(1px, -1px) rotate(1deg); } 6% { -ms-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -ms-transform: translate(-3px, 1px) rotate(0deg); } 8% { -ms-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; } }
+	@-o-keyframes -razilo-message-show-a { 0% { opacity: 1; } 1% { -o-transform: translate(2px, 1px) rotate(0deg); } 2% { -o-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -o-transform: translate(-3px, 0px) rotate(1deg); } 4% { -o-transform: translate(0px, 2px) rotate(0deg); } 5% { -o-transform: translate(1px, -1px) rotate(1deg); } 6% { -o-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -o-transform: translate(-3px, 1px) rotate(0deg); } 8% { -o-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; }	}
+	@-o-keyframes -razilo-message-show-b {	0% { opacity: 1; } 1% { -o-transform: translate(2px, 1px) rotate(0deg); } 2% { -o-transform: translate(-1px, -2px) rotate(-1deg); } 3% { -o-transform: translate(-3px, 0px) rotate(1deg); } 4% { -o-transform: translate(0px, 2px) rotate(0deg); } 5% { -o-transform: translate(1px, -1px) rotate(1deg); } 6% { -o-transform: translate(-1px, 2px) rotate(-1deg); } 7% { -o-transform: translate(-3px, 1px) rotate(0deg); } 8% { -o-transform: none; } 95% { opacity: 1; } 100% { opacity: 0; } }
+	@keyframes -razilo-message-show-a { 0% { opacity: 1; } 1% { transform: translate(2px, 1px) rotate(0deg); } 2% { transform: translate(-1px, -2px) rotate(-1deg); } 3% { transform: translate(-3px, 0px) rotate(1deg); } 4% { transform: translate(0px, 2px) rotate(0deg); } 5% { transform: translate(1px, -1px) rotate(1deg); } 6% { transform: translate(-1px, 2px) rotate(-1deg); } 7% { transform: translate(-3px, 1px) rotate(0deg); } 8% { transform: none; } 95% { opacity: 1; } 100% { opacity: 0; }	}
+	@keyframes -razilo-message-show-b {	0% { opacity: 1; } 1% { transform: translate(2px, 1px) rotate(0deg); } 2% { transform: translate(-1px, -2px) rotate(-1deg); } 3% { transform: translate(-3px, 0px) rotate(1deg); } 4% { transform: translate(0px, 2px) rotate(0deg); } 5% { transform: translate(1px, -1px) rotate(1deg); } 6% { transform: translate(-1px, 2px) rotate(-1deg); } 7% { transform: translate(-3px, 1px) rotate(0deg); } 8% { transform: none; } 95% { opacity: 1; } 100% { opacity: 0; } }
+
+	razilo-message[position='top'] { top: 0px; bottom: initial; text-align: center; }
+	razilo-message[position='bottom'] { top: initial; bottom: 0px; text-align: center; }
+	razilo-message[position='top-left'] { width: auto; max-width: 50%; top: 0px; bottom: initial; left: 0px; right: initial; text-align: left; }
+	razilo-message[position='top-right'] { width: auto; max-width: 50%; top: 0px; bottom: initial; left: initial; right: 0px; text-align: right; }
+	razilo-message[position='bottom-left'] { top: initial; width: auto; max-width: 50%; top: initial; bottom: 0px; left: 0px; right: initial; text-align: left; }
+	razilo-message[position='bottom-right'] { top: initial; width: auto; max-width: 50%; top: initial; bottom: 0px; left: initial; right: 0px; text-align: right; }
+	razilo-message[color='red'] .-spacer { background-color: rgb(255, 44, 44); color: #fff; }
+	razilo-message[color='blue'] .-spacer { background-color: rgb(74, 74, 255); color: #fff; }
+	razilo-message[color='green'] .-spacer { background-color: rgb(18, 163, 18); color: #fff; }
+	razilo-message[color='orange'] .-spacer { background-color: rgb(255, 136, 26); color: #fff; }
+	razilo-message[color='black'] .-spacer { background-color: #444; color: #fff; }
+	razilo-message[shape='round'] .-spacer { border-radius: 100px; }
+	razilo-message[shape='rounded'] .-spacer { border-radius: 5px; }
+	razilo-message[shape='oval'] .-spacer { border-radius: 75% / 77%; }
+	razilo-message[persist] { display: block; opacity: 1; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-message">
+	<div class="-spacer">
+		<content></content>
+	</div>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-message', {
+		timer: null,
+		delay: 3100,
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			if (name == 'show' && newVal !== null) {
+				this.fireEvent('show');
+
+				if (this.getHost().hasAttribute('animate-a')) {
+					this.getHost().removeAttribute('animate-a');
+					this.getHost().setAttribute('animate-b', '');
+				} else {
+					this.getHost().removeAttribute('animate-b');
+					this.getHost().setAttribute('animate-a', '');
+				}
+
+				this.getHost().removeAttribute('persist');
+				this.getHost().removeAttribute('show');
+				this.setTimer();
+			}
+
+			if (name == 'delay') this.setDelay(newVal);
+		},
+
+		show: function() {
+			this.getHost().setAttribute('show', '');
+		},
+
+		setTimer: function() {
+			clearTimeout(this.timer);
+			var scope = this;
+			this.timer = setTimeout(function() {
+				scope.fireEvent('hide');
+				scope.getHost().removeAttribute('animate-a');
+				scope.getHost().removeAttribute('animate-b');
+			}, this.delay);
+		},
+
+		setDelay: function(val) {
+			this.delay = val == 'triple' ? 9100 : val == 'double' ? 6100 : 3100;
+		}
+	});
+</script>

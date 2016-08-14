@@ -1,0 +1,107 @@
+<!--
+* raziloComponents
+* razilo-modal - Overlay message for use as notification tool
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-modal { padding: 20px; position: fixed; opacity: 0; display: none; width: 100%; left: 0px; top: 50%; z-index: 3000; }
+	razilo-modal .-spacer { padding: 10px; background-color: #f4f4f4; color: #444; font-size: 14px; box-shadow: 0px 0px 30px 0px rgba(40, 40, 40, 0.61); }
+	@media (min-width: 500px) { razilo-modal { width: 70%; left: 15%; } razilo-modal[size='small'] { width: 50%; left: 25%; } razilo-modal[size='large'] { width: 90%; left: 5%; } }
+	@media (min-width: 800px) { razilo-modal { width: 60%; left: 20%; } razilo-modal[size='small'] { width: 40%; left: 30%; } razilo-modal[size='large'] { width: 80%; left: 10%; } }
+	@media (min-width: 1200px) { razilo-modal { width: 50%; left: 25%; } razilo-modal[size='small'] { width: 30%; left: 35%; } razilo-modal[size='large'] { width: 70%; left: 15%; } }
+	razilo-modal[animate-show] { display: block; -webkit-animation-name: -razilo-modal-show; -webkit-animation-duration: 0.25s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-modal-show; -moz-animation-duration: 0.25s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -moz-animation-fill-mode: forwards; -ms-animation-name: -razilo-modal-show; -ms-animation-duration: 0.25s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -ms-animation-fill-mode: forwards; -o-animation-name: -razilo-modal-show; -o-animation-duration: 0.25s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; -o-animation-fill-mode: forwards; animation-name: -razilo-modal-show; animation-duration: 0.25s; animation-iteration-count: 1; animation-timing-function: linear; animation-fill-mode: forwards; }
+	razilo-modal[animate-hide] { display: block; -webkit-animation-name: -razilo-modal-hide; -webkit-animation-duration: 0.25s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-modal-hide; -moz-animation-duration: 0.25s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -moz-animation-fill-mode: forwards; -ms-animation-name: -razilo-modal-hide; -ms-animation-duration: 0.25s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -ms-animation-fill-mode: forwards; -o-animation-name: -razilo-modal-hide; -o-animation-duration: 0.25s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; -o-animation-fill-mode: forwards; animation-name: -razilo-modal-hide; animation-duration: 0.25s; animation-iteration-count: 1; animation-timing-function: linear; animation-fill-mode: forwards; }
+	@-webkit-keyframes -razilo-modal-show { 0% { opacity: 0; } 100% { opacity: 1; } }
+	@-webkit-keyframes -razilo-modal-hide { 0% { opacity: 1; } 100% { opacity: 0; } }
+	@-moz-keyframes -razilo-modal-show { 0% { opacity: 0; } 100% { opacity: 1; } }
+	@-moz-keyframes -razilo-modal-hide { 0% { opacity: 1; } 100% { opacity: 0; } }
+	@-ms-keyframes -razilo-modal-show { 0% { opacity: 0; } 100% { opacity: 1; } }
+	@-ms-keyframes -razilo-modal-hide { 0% { opacity: 1; } 100% { opacity: 0; } }
+	@-o-keyframes -razilo-modal-show { 0% { opacity: 0; } 100% { opacity: 1; } }
+	@-o-keyframes -razilo-modal-hide { 0% { opacity: 1; } 100% { opacity: 0; } }
+	@keyframes -razilo-modal-show { 0% { opacity: 0; } 100% { opacity: 1; } }
+	@keyframes -razilo-modal-hide { 0% { opacity: 1; } 100% { opacity: 0; } }
+	razilo-modal .-heading { padding: 10px; min-height: 30px; }
+	razilo-modal .-heading heading { padding: 0px 40px 0px 0px; font-size: 20px; line-height: 20px; font-weight: bold; }
+	razilo-modal .-heading .-close { cursor: pointer; font-size: 24px; line-height: 30px; position: absolute; top: 24px; right: 24px; }
+	razilo-modal .-heading .-close:hover { opacity: 0.8; }
+	razilo-modal main { display: block; padding: 10px; overflow: auto; box-sizing: border-box; width: 100%; max-height: 500px; }
+	razilo-modal footer { display: block; padding: 10px 0 0 0; text-align: right; }
+	razilo-modal[color='red'] .-spacer { background-color: rgb(255, 44, 44); color: #fff; }
+	razilo-modal[color='blue'] .-spacer { background-color: rgb(74, 74, 255); color: #fff; }
+	razilo-modal[color='green'] .-spacer { background-color: rgb(18, 163, 18); color: #fff; }
+	razilo-modal[color='orange'] .-spacer { background-color: rgb(255, 136, 26); color: #fff; }
+	razilo-modal[color='black'] .-spacer { background-color: #444; color: #fff; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-modal">
+	<div class="-spacer">
+		<div class="-heading" bind-if="heading">
+			<content select="heading"></content>
+			<razilo-icon class="-close" name="times" bind-event="{'click': hide()}" fw></razilo-icon>
+		</div>
+		<content select="main"></content>
+		<content select="footer"></content>
+	</div>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-modal', {
+		heading: true,
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			if (name == 'show')
+			{
+				if (newVal !== null)
+				{
+					this.fireEvent('show');
+					if (this.getHost().querySelector('content[select="heading"]')) this.heading = false;
+					window.addEventListener('resize', this.resize.bind(this));
+					this.getHost().setAttribute('animate-show', '');
+					this.getHost().removeAttribute('animate-hide');
+					setTimeout(this.resize.bind(this), 10);
+				}
+				else
+				{
+					this.getHost().setAttribute('animate-hide', '');
+					this.getHost().removeAttribute('animate-show');
+					this.setTimer();
+				}
+			}
+		},
+
+		show: function() {
+			this.getHost().setAttribute('show', '');
+		},
+
+		hide: function() {
+			this.getHost().removeAttribute('show');
+		},
+
+		setTimer: function() {
+			var scope = this;
+			setTimeout(function() {
+				scope.fireEvent('hide');
+				window.removeEventListener('resize', this.resize);
+				scope.getHost().removeAttribute('animate-show');
+				scope.getHost().removeAttribute('animate-hide');
+			}, 300);
+		},
+
+		resize: function()
+		{
+			var main = this.getHost().querySelector('main');
+			if (main) main.style.maxHeight = ((window.innerHeight + main.offsetHeight - this.getHost().offsetHeight) / 100) * 90 + 'px';
+
+			var marginTop = (this.getHost().offsetHeight - (this.getHost().offsetHeight * 2)) / 2;
+			this.getHost().style.marginTop = marginTop + 'px';
+		}
+	});
+</script>

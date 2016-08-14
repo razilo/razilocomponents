@@ -1,15 +1,19 @@
 {
-  "name": "razilocomponents",
   "version": "1.0.0",
-  "description": "ES6 web components built using raziloComponent.",
+  "name": "razilocomponents",
+  "description": "raziloComponents HTML web components created using the raziloComponent helper library.",
   "author": "Paul Smith (smiffy6969)",
   "homepage": "http://component.razilo.net",
+  "license": "MIT",
   "dependencies": {
-	"razilocomponent": "^1.0.0"
-	"font-awesome": "^4.6.1",
+      "razilocomponent": "^1.0.0",
+	  "font-awesome": "^4.6.3"
   },
-  "devDependencies": {},
-  "browserify": {
-    "transform": [["babelify", { "presets": ["es2015-loose"] }]]
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-util": "^3.0.7",
+    "gulp-vulcanize": "^6.1.0",
+    "gulp-watch": "^4.3.5"
   }
 }

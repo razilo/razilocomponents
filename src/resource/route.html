@@ -1,0 +1,58 @@
+<!--
+* raziloComponents
+* razilo-route - Sets and gets application routing using hashbang rounting
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-route { display: none; }
+</style>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-route', {
+		value: null,
+		defaultRoute: null,
+		location: null,
+
+		attached: function()
+		{
+			// Initial setup
+			this.defaultRoute = this.getHost().getAttribute('default') || this.defaultRoute;
+			this.location = window.location.href.split('#!')[0];
+			this.value = window.location.href.split('#!')[1];
+			this.setRoute();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			switch (name)
+			{
+				case 'default':
+					this.defaultRoute = newVal;
+				break;
+				case 'value':
+					if (newVal !== null)
+					{
+						this.value = newVal;
+						this.setRoute();
+					}
+				break;
+			}
+		},
+
+		setRoute: function()
+		{
+			this.value = typeof this.value !== 'undefined' ? this.value : this.defaultRoute;
+
+			var newLoc = this.location + '#!' + this.value;
+			if (typeof this.value === 'string' && this.value.length > 0 && window.location.href != newLoc) window.location.href = newLoc;
+
+			this.getHost().value = this.value;
+			this.fireEvent('change');
+		}
+	});
+</script>

@@ -1,0 +1,34 @@
+<!--
+* raziloComponents
+* razilo-tag - Displays a contents of the tag in a coloured box, much like a bootstrap label.
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-tag { display: inline-block; padding: 6px 8px; background: #ddd; color: #222;}
+	razilo-tag[size='extra-small'] { padding: 2px 4px; font-size: 10px; line-height: 10px; }
+	razilo-tag[size='small'] { padding: 4px 6px; font-size: 12px; line-height: 12px; }
+	razilo-tag[size='medium'] { padding: 6px 8px; font-size: 14px; line-height: 16px; }
+	razilo-tag[size='large'] { padding: 8px 12px; font-size: 18px; line-height: 18px; }
+	razilo-tag[size='extra-large'] { padding: 10px 14px; font-size: 22px; line-height: 22px; }
+	razilo-tag[shape='round'] { border-radius: 100px; }
+	razilo-tag[shape='rounded'] { border-radius: 5px; }
+	razilo-tag[shape='oval'] { border-radius: 75% / 77%; }
+	razilo-tag[color='grey'] { background: #ddd; color: #222; }
+	razilo-tag[color='blue'] { background: rgb(74, 74, 255); color: #fff; }
+	razilo-tag[color='red'] { background: rgb(255, 44, 44); color: #fff; }
+	razilo-tag[color='green'] { background: rgb(18, 163, 18); color: #fff; }
+	razilo-tag[color='orange'] { background: rgb(255, 136, 26); color: #fff; }
+	razilo-tag[color='black'] { background: #222; color: #fff; }
+	razilo-tag[color='pink'] { background: #D729D5; color: #fff; }
+	razilo-tag[color='purple'] { background: #8913D4; color: #fff; }
+	razilo-tag[color='yellow'] { background: #E5E522; color: #444; }
+	razilo-tag[color='aqua'] { background: #31AEDB; color: #FFF; }
+	razilo-tag[color='white'] { background: #FFFFFF; color: #444; }
+</style>
+
+<!-- LOGIC -->
+<script>new RaziloComponent('razilo-tag')</script>

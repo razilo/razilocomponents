@@ -1,0 +1,162 @@
+<!--
+* raziloComponents
+* razilo-choose - Form input with user feedback
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../base/razilo-icon.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-choose { height: 30px; display: inline-block; }
+	razilo-choose .-items { height: 30px; width: 100%; display: block; margin-top: 2px; padding: 0px; }
+	razilo-choose .-items .-item { padding: 0px 3px; background-color: #ddd; color: #444; border: 2px solid #ddd; margin: 0px 2px 2px 0px; display: inline-block; }
+	razilo-choose .-items .-item razilo-icon { cursor: pointer; opacity: 0.8; }
+	razilo-choose .-items .-item razilo-icon:hover { opacity: 1; }
+	razilo-choose .-chooser { width: 100%; box-sizing: border-box; }
+	razilo-choose .-chooser select { height: 30px; width: inherit; padding: 2px 5px; border: 1px solid #888; outline: none; font-size: 15px; background: transparent; }
+	razilo-choose .-chooser select:focus:not([disabled]), razilo-choose .-chooser select:active:not([disabled]) { border: 1px solid #444; }
+	razilo-choose .-chooser select[disabled] { cursor: not-allowed; border: 1px dashed #888; background-color: #fff; }
+	razilo-choose .-chooser select option { color: #444; }
+	razilo-choose .-chooser select option.-placeholder { color: #aaa; }
+	razilo-choose .-chooser select { color: #444; }
+	razilo-choose .-chooser select[selected] { color: #444; }
+	razilo-choose .-chooser options { display: none }
+	razilo-choose[add] .-chooser { padding-right: 35px; position: relative; }
+	razilo-choose[add] .-chooser button { position: absolute; top: 0px; right: 0px; }
+	razilo-choose[disabled] .-items .-item { border: 1px dashed #ccc; background-color: #fff; }
+	razilo-choose[disabled] .-items .-item razilo-icon { cursor: not-allowed; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-choose">
+	<div class="-chooser">
+		<options>
+			<content></content>
+		</options>
+		<select bind-value="private.selected" bind-event="{'change': selectedOption()}">
+			<option bind-if="placeholder" bind-text="placeholder" class="-placeholder" value="" disabled></option>
+		</select>
+		<button bind-show="private.add" is="razilo-button" size="medium" shape="round" color="green" bind-event="{'click': selectedOption()}" icon>
+			<razilo-icon name="plus"></razilo-icon>
+		</button>
+	</div>
+	<ul class="-items">
+		<li class="-item" bind-for="value">
+			<span bind-text="$value.label"></span>
+			<razilo-icon name="times" bind-event="{'click': removeItem($key)}"></razilo-icon>
+		</li>
+	</ul>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-choose', {
+		value: [],
+		placeholder: null,
+		add: false,
+
+		attached: function()
+		{
+			// lets check value type
+			this.parseOptions();
+			this.parseValue();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			switch (name)
+			{
+				case 'placeholder':
+					this.placeholder = newVal;
+				break;
+				case 'disabled':
+					if (this.getHost().hasAttribute('disabled')) this.getHost().querySelector('select').setAttribute('disabled', '');
+					else this.getHost().querySelector('select').removeAttribute('disabled');
+				break;
+				case 'add':
+					if (this.getHost().hasAttribute('add')) this.private.add = 1;
+					else this.private.add = 0;
+				break;
+			}
+		},
+
+		parseOptions: function()
+		{
+			// push options into select, if any
+			var options = this.getHost().querySelector('options');
+			var select = this.getHost().querySelector('select');
+			while(options.firstChild) select.appendChild(options.firstChild);
+			options.parentNode.removeChild(options);
+			delete options;
+		},
+
+		parseValue: function()
+		{
+			// get values set
+			var values = this.getHost().value;
+			if (!values || typeof values !== 'object') return;
+
+			// parse values to options and set
+			var value = [];
+			var options;
+			for (var key in values) {
+				options = this.getHost().querySelectorAll("select option[value='" + values[key].value + "']");
+				if (!options.length < 1) option = this.getHost().querySelectorAll('select option');
+
+				for (var i = 0; i < options.length; i++) {
+					if (options[i].innerHTML == values[key].label)
+					{
+						value.push(values[key]);
+						break;
+					}
+				}
+			}
+			this.value = value;
+		},
+
+		selectedOption: function(ev)
+		{
+			// are we on auto, or have add button, or disabled
+			if (this.disabled || (ev.type === 'change' && this.add)) return;
+
+			// cache values into array
+			var value = [];
+			for (var key in this.value) value.push(this.value[key]);
+
+			// grab options
+			var options = ev.target.querySelectorAll("option[value='" + ev.target.value + "']");
+			if (!options.length < 1) options = this.getHost().querySelectorAll('option');
+
+			// add option to values
+			for (var i = 0; i < options.length; i++) {
+				if (ev.target.value == options[i].value || ev.target.value == options[i].innerHTML)
+				{
+					value.push({'value': options[i].value, 'label': options[i].innerHTML});
+					break;
+				}
+			}
+
+			this.getHost().value = this.value = value;
+			this.fireEvent('change');
+		},
+
+		removeItem: function(ev, key)
+		{
+			if (this.getHost().hasAttribute('disabled')) return;
+
+			var value = [];
+			for (var id in this.value)
+			{
+				if (id == key) continue;
+				value.push(this.value[id]);
+			}
+
+			this.getHost().value = this.value = value;
+			this.fireEvent('change');
+		}
+	});
+</script>

@@ -1,0 +1,116 @@
+<!--
+* raziloComponents
+* razilo-partial - Partial loader, to load html directly into element content based on url
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-partial', {
+		basepath: null,
+		partial: null,
+
+		created: function()
+		{
+			// Initial setup
+			this.basepath = this.getHost().getAttribute('basepath') || this.basepath;
+			this.partial = this.getHost().getAttribute('partial') || this.partial;
+
+			this.load();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			if (oldVal == newVal) return;
+			if (name == 'basepath') this.basepath = newVal;
+			if (name == 'partial')
+			{
+				this.partial = newVal;
+				this.load();
+			}
+		},
+
+		load: function()
+		{
+			if (this.partial === null) return;
+
+			// retrict urls to html, htm files only
+			var path = this.basepath === null ? '' : (this.basepath.substr(-1) !== '/' ? this.basepath : this.basepath.substring(0, this.basepath.length - 1));
+			var partial = path + (path.length > 1 ? '/' : '') + this.partial.split('.')[0] + '.html';
+
+			// do async request to grab content
+			var XHR = XMLHttpRequest || ActiveXObject;
+			var request = new XHR('MSXML2.XMLHTTP.3.0');
+			var scope = this;
+			request.open('GET', partial, true);
+			request.onreadystatechange = function ()
+			{
+				if (request.readyState === 4)
+				{
+					if (request.status === 200)
+					{
+						var frag = document.createElement('FRAG');
+						frag.innerHTML = request.responseText;
+
+						var depends = frag.querySelector('dependencies');
+
+						if (depends)
+						{
+							// we have deps, so are they loaded?
+							if (!document.querySelector("dependencies[path='"+ partial +"']"))
+							{
+								depends.setAttribute('path', partial);
+								frag.removeChild(depends);
+
+								// monitor deps loading to promise
+								var promises = [];
+								for (var i = 0; i < depends.childNodes.length; i++) {
+									if (depends.childNodes[i].nodeType == 1)
+									{
+										promises[i] = new Promise(function(resolve)
+										{
+											depends.childNodes[i].addEventListener('load', function(ev) { return resolve(3); });
+										});
+									}
+								}
+
+								// once all deps loaded, load inner html
+								Promise.all(promises).then(function(){
+									setTimeout(function()
+									{
+										scope.getHost().innerHTML = frag.innerHTML;
+										scope.fireEvent('loaded');
+									},1);
+								});
+
+								document.querySelector('head').appendChild(depends);
+							}
+							else
+							{
+								setTimeout(function()
+								{
+									// immediately load if no deps to worry about
+									scope.getHost().innerHTML = frag.innerHTML;
+									scope.fireEvent('loaded');
+								},1);
+							}
+						}
+						else
+						{
+							setTimeout(function()
+							{
+								// immediately load if no deps to worry about
+								scope.getHost().innerHTML = frag.innerHTML;
+								scope.fireEvent('loaded');
+							},1);
+						}
+					}
+					else throw 'razilo-partial: Error loading partial [' + partial + ']';
+				}
+			};
+			request.send();
+		}
+	});
+</script>

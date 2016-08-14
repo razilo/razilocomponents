@@ -1,0 +1,102 @@
+<!--
+* raziloComponents
+* razilo-paginate - Overlay modal with auto height and mobile snap layout
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../base.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-paginate .-holder { text-align: center; }
+	razilo-paginate .-holder razilo-tag { min-width: 100px; }
+	razilo-paginate .-holder razilo-tag input { border: 1px solid #888; text-align: right; width: 60px; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-paginate">
+	<div class="-holder">
+		<button is="razilo-button" shape="round" color="grey" size="medium" bind-event="{'click': beginning()}" icon><razilo-icon name="angle-double-left"></razilo-icon></button>
+		<button is="razilo-button" shape="round" color="grey" size="medium" bind-event="{'click': pageLeft()}" icon><razilo-icon name="angle-left"></razilo-icon></button>
+		<razilo-tag shape="round" color="grey">
+			Page <input type="text" bind-value="value" bind-event="{'change': goTo()}"/>
+			of <span bind-text="pages"></span>
+		</razilo-tag>
+		<button is="razilo-button" shape="round" color="grey" size="medium" bind-event="{'click': pageRight()}" icon><razilo-icon name="angle-right"></razilo-icon></button>
+		<button is="razilo-button" shape="round" color="grey" size="medium" bind-event="{'click': end()}" icon><razilo-icon name="angle-double-right"></razilo-icon></button>
+	</div>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-paginate', {
+		value: 1,
+		pages: 1,
+
+		attached: function()
+		{
+			this.value = this.getHost().hasAttribute('value') ? parseInt(this.getHost().getAttribute('value')) : 1;
+			this.pages = this.getHost().hasAttribute('pages') ? parseInt(this.getHost().getAttribute('pages')) : 1;
+
+			this.resolveValues();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			if (name == 'value' && this.value != newVal) this.value = parseInt(newVal);
+			if (name == 'pages') this.pages = parseInt(newVal);
+
+			this.resolveValues();
+		},
+
+		resolveValues: function()
+		{
+			if (this.pages < 1) this.pages = 1;
+			if (this.value < 1) this.value = 1;
+			if (this.value > this.pages) this.value = this.pages
+		},
+
+		pageLeft: function()
+		{
+			if (this.value <= 1) return;
+
+			this.value--;
+			this.getHost().value = this.value;
+			this.fireEvent('change');
+		},
+
+		pageRight: function()
+		{
+			if (this.value >= this.pages) return;
+
+			this.value++;
+			this.getHost().value = this.value;
+			this.fireEvent('change');
+		},
+
+		beginning: function()
+		{
+			this.getHost().value = 1;
+			this.fireEvent('change');
+		},
+
+		end: function()
+		{
+			this.getHost().value = this.pages;
+			this.fireEvent('change');
+		},
+
+		goTo: function()
+		{
+			if (isNaN(this.value)) this.value = parseInt(this.getHost().value);
+			else if (this.value < 1) this.value = 1;
+			else if (this.value > this.pages) this.value = this.pages;
+
+			this.getHost().value = this.value;
+			this.fireEvent('change');
+		}
+	});
+</script>

@@ -1,0 +1,17 @@
+<!--
+* raziloComponents
+* razilo-page - Works along side naff-menu to provide a place to build content alongside the naff-menu
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-page { padding: 0px 0px 0px 225px; position: absolute; height: 100%; width: 100%; box-sizing: border-box; }
+	razilo-page[position="left"] { padding: 0px 225px 0px 0px; }
+	@media (max-width: 720px) { razilo-page { padding: 40px 0px 0px 0px; height: auto; overflow: initial; } }
+</style>
+
+<!-- LOGIC -->
+<script>new RaziloComponent('razilo-page')</script>

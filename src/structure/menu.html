@@ -1,0 +1,141 @@
+<!--
+* raziloComponents
+* razilo-menu - Outputs a menu structure that updates selected attribute based on selected location
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../base.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-menu * { color: #555; }
+	razilo-menu { display: block; margin: 0; padding: 0; box-sizing: border-box; width: 225px; height: 100%; background-color: #eee; color: #222; position: fixed; top: 0px; z-index: 1000; overflow: auto; max-height: 100%; }
+	razilo-menu[position="left"] { left: 0px; }
+	razilo-menu[position="right"] { right: 0px; }
+	razilo-menu ul { margin: 0px; padding: 0px; color: inherit; list-style-type: none; }
+	razilo-menu * { color: inherit; }
+	razilo-menu > ul > li { border-top: 1px solid rgba(0, 0, 0, 0.1); }
+	razilo-menu > ul > li:last-child { border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+	razilo-menu ul li a { outline: 0; text-decoration: none; display: inherit; padding: 5px; font-size: 14px; line-height: 30px; cursor: pointer; color: inherit; opacity: 0.85; }
+	razilo-menu ul li a razilo-icon { text-align: center; color: inherit; width: 2em; }
+	razilo-menu ul li[selected] > a { outline: 0; color: inherit; text-decoration: none; background-color: rgba(0, 0, 0, 0.1); }
+	razilo-menu ul li:hover > a { outline: 0; color: inherit; text-decoration: none; opacity: 1; }
+	razilo-menu ul li ul li a { text-decoration: none; padding-left: 15px; }
+	razilo-menu ul li ul li ul li a { text-decoration: none; padding-left: 25px; }
+	razilo-menu ul li ul li ul li ul li a { text-decoration: none; padding-left: 35px; }
+	razilo-menu ul li ul li ul li ul li ul li a { text-decoration: none; padding-left: 45px; }
+	razilo-menu razilo-icon[name="bars"] { display: none; }
+	razilo-menu[children="expandable"] ul li ul { display: none; }
+	razilo-menu[children="expandable"] ul li[selected] > ul, razilo-menu[children="expandable"] ul li ul[active] { display: block; }
+	razilo-menu ._side-logo, razilo-menu ._top-logo { display: none; }
+	razilo-menu ._top-logo ._top-logo-text, razilo-menu ._side-logo ._side-logo-text { min-height: 40px; line-height: 40px; opacity: 0.85; cursor: pointer; }
+	razilo-menu ._top-logo img, razilo-menu ._side-logo img { cursor: pointer; }
+	@media (max-width:720px) { razilo-menu { width: 100%; height: auto; top: 0px; left: 0px; } razilo-menu razilo-icon[name="bars"] { font-size: 18px; line-height: 40px; opacity: 0.85; display: block; position: absolute; top: 0px; right: 8px; cursor: pointer; } razilo-menu razilo-icon[name="bars"]:hover, razilo-menu razilo-icon[name="bars"]:active, razilo-menu razilo-icon[name="bars"]:focus { opacity: 1; } razilo-menu ._top-logo { display: inline-block; height: 40px; } razilo-menu ._top-logo img { display: inline-block; height: 36px; margin-left: 2px; margin-top: 2px; float: left; } razilo-menu ._top-logo ._top-logo-text { display: inline-block; padding-left: 5px; } razilo-menu ._top-logo ._top-logo-text:empty { display: inline; } }
+	@media (min-width:721px) { razilo-menu > ul, razilo-menu ._content { display: block !important; } razilo-menu ._side-logo-text { display: block; } razilo-menu ._side-logo-text:empty { display: none; } razilo-menu ._side-logo img { margin-top: 10px; margin-bottom: 10px; display: inline-block; max-width: 100%; } razilo-menu ._side-logo { display: block; text-align: center; width: 100%; } }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-menu">
+	<razilo-icon fw name="bars" bind-event="{'click': showMenu()}"></razilo-icon>
+	<div class="_side-logo">
+		<img bind-show="sideLogo" bind-src="sideLogo" bind-event="{'click': setRoute(home)}" default alt="logo">
+		<span class="_side-logo-text" bind-text="sideLogoText" bind-event="{'click': setRoute(home)}" default></span>
+	</div>
+	<div class="_top-logo">
+		<img bind-if="topLogo" bind-src="topLogo" bind-event="{'click': setRoute(home)}" default alt="logo">
+		<span class="_top-logo-text" bind-text="topLogoText" bind-event="{'click': setRoute(home)}" default></span>
+	</div>
+	<ul bind-show="show">
+		<li bind-for="model" bind-selected="$value.route" alter-selected="{'equal': value}">
+			<a bind-href="$value.route" alter-href="{'prefix': '#!'}" bind-event="{'click': setRoute($value.route)}"><razilo-icon bind-attributes="{'name': $value.icon}" bind-show="$value.icon"></razilo-icon><span bind-text="$value.label"></span></a>
+			<ul bind-if="$value.menuItems">
+				<li bind-for="$value.menuItems" bind-selected="$value.route" alter-selected="{'equal': value}">
+					<a bind-href="$value.route" alter-href="{'prefix': '#!'}" bind-event="{'click': setRoute($value.route)}"><razilo-icon bind-attributes="{'name': $value.icon}" bind-show="$value.icon"></razilo-icon><span bind-text="$value.label"></span></a>
+					<ul bind-if="$value.menuItems">
+						<li bind-for="$value.menuItems" bind-selected="$value.route" alter-selected="{'equal': value}">
+							<a bind-href="$value.route" alter-href="{'prefix': '#!'}" bind-event="{'click': setRoute($value.route)}"><razilo-icon bind-attributes="{'name': $value.icon}" bind-show="$value.icon"></razilo-icon><span bind-text="$value.label"></span></a>
+							<ul bind-if="$value.menuItems">
+								<li bind-for="$value.menuItems" bind-selected="$value.route" alter-selected="{'equal': value}">
+									<a bind-href="$value.route" alter-href="{'prefix': '#!'}" bind-event="{'click': setRoute($value.route)}"><razilo-icon bind-attributes="{'name': $value.icon}" bind-show="$value.icon"></razilo-icon><span bind-text="$value.label"></span></a>
+									<ul bind-if="$value.menuItems">
+										<li bind-for="$value.menuItems" bind-selected="$value.route" alter-selected="{'equal': value}">
+											<a bind-href="$value.route" alter-href="{'prefix': '#!'}" bind-event="{'click': setRoute($value.route)}"><razilo-icon bind-attributes="{'name': $value.icon}" bind-show="$value.icon"></razilo-icon><span bind-text="$value.label"></span></a>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</li>
+	</ul>
+	<div class="_content" bind-show="show">
+		<content></content>
+	</div>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-menu', {
+		value: null,
+		home: null,
+		model: [],
+		show: false,
+		sideLogoText: null,
+		topLogoText: null,
+		sideLogo: null,
+		topLogo: null,
+
+		attached: function()
+		{
+			// Initial setup
+			this.sideLogo = this.getHost().getAttribute('side-logo') || this.sideLogo;
+			this.topLogo = this.getHost().getAttribute('top-logo') || this.topLogo;
+			this.sideLogoText = this.getHost().getAttribute('side-logo-text') || this.sideLogoText;
+			this.topLogoText = this.getHost().getAttribute('top-logo-text') || this.topLogoText;
+			this.home = this.getHost().getAttribute('home') || this.home;
+			this.value = this.getHost().getAttribute('value') || this.value;
+			this.model = this.getMenuData();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			switch (name)
+			{
+				case 'side-logo': this.sideLogo = newVal; break;
+				case 'top-logo': this.topLogo = newVal; break;
+				case 'side-logo-text': this.sideLogoText = newVal; break;
+				case 'top-logo-text': this.topLogoText = newVal; break;
+				case 'home': this.home = newVal; break;
+				case 'value': this.value = newVal; break;
+				case 'model': this.model = this.getMenuData(); break;
+			}
+		},
+
+		getMenuData: function() {
+			if (this.getHost().model) return this.getHost().model;
+
+			try { return JSON.parse(this.getHost().getAtrribute('model')); }
+			catch (e) { return this.model; }
+		},
+
+		setRoute: function(ev, route)
+		{
+			ev.stopPropagation();
+			ev.preventDefault();
+
+			this.getHost().value = route;
+			this.show = false;
+			this.fireEvent('change');
+		},
+
+		showMenu: function()
+		{
+			this.show = !this.show;
+		}
+	});
+</script>

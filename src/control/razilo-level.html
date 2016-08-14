@@ -1,0 +1,81 @@
+<!--
+* raziloComponents
+* razilo-level - Level indicator for things like feedback, reviews...
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../base.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-level razilo-icon { opacity: 0.8; cursor: pointer; }
+	razilo-level razilo-icon:hover { opacity: 1; cursor: pointer; }
+	razilo-level[disabled] razilo-icon, razilo-level[disabled] razilo-icon:hover { opacity: 0.5; cursor: not-allowed; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-level">
+	<razilo-icon bind-for="stars" bind-attributes="{'name': $value, 'size': size}" bind-event="{'click': updateStars($key)}" fw></razilo-icon>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-level', {
+		value: 0,
+		maximum: 5,
+		size: 2,
+		iconFilled: 'star',
+		iconEmpty: 'star-o',
+		disabled: false,
+		stars: null,
+
+		attached: function()
+		{
+			// Initial setup
+			if (this.getHost().hasAttribute('disabled')) this.disabled = true;
+			if (this.getHost().hasAttribute('value')) this.value = this.getHost().value || parseInt(this.getHost().getAttribute('value'));
+			if (this.getHost().hasAttribute('icon-filled')) this.iconFilled = this.getHost().getAttribute('icon-filled');
+			if (this.getHost().hasAttribute('icon-empty')) this.iconEmpty = this.getHost().getAttribute('icon-empty');
+			if (this.getHost().hasAttribute('size')) this.size = parseInt(this.getHost().getAttribute('size'));
+			if (this.getHost().hasAttribute('maximum')) this.maximum = parseInt(this.getHost().getAttribute('maximum'));
+			this.createStars();
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			if (name == 'disabled') this.disabled = !newValue ? false: true;
+			if (name == 'icon-filled') this.iconFilled = newValue;
+			if (name == 'icon-empty') this.iconEmpty = newValue;
+			if (name == 'size') this.size = newValue;
+
+			if (name =='value')
+			{
+				this.value = this.getHost().value || newVal;
+				this.createStars();
+			}
+
+			if (name =='maximum')
+			{
+				this.maximum = parseInt(newVal);
+				this.createStars();
+			}
+		},
+
+		createStars: function()
+		{
+			var stars = [];
+			for (var i = 0; i < this.maximum; i++) stars.push(i < this.value ? this.iconFilled : this.iconEmpty);
+			this.stars = stars;
+		},
+
+		updateStars: function(ev, idx)
+		{
+			if (this.disabled) return;
+			this.getHost().value = parseInt(idx) + 1;
+			this.fireEvent('change');
+		}
+	});
+</script>

@@ -1,0 +1,303 @@
+<!--
+* raziloComponents
+* razilo-date-picker - For selecting dates
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../base.html">
+<link rel="import" href="../control.html">
+<link rel="import" href="../overlay.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-date-picker razilo-modal { width: 380px; left: 50%; margin-left: -190px; }
+	razilo-date-picker razilo-modal .-container .-controls { display: block; width: 100%; text-align: center; overflow: hidden; margin-bottom: 8px; padding-bottom: 2px; }
+	razilo-date-picker razilo-modal .-container .-controls .-tag-box { width: 130px; display: inline-block; }
+	razilo-date-picker razilo-modal .-container .-controls .-clear { position: absolute; left: 40px; }
+	razilo-date-picker razilo-modal .-container .-controls .-close { position: absolute; right: 40px; }
+	razilo-date-picker razilo-modal .-container .-controls .-close:hover, razilo-date-picker razilo-modal .-container .-controls .-clear:hover  { opacity: 1; }
+	razilo-date-picker razilo-modal .-container .-frame { position: relative; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker { width: 100%; display: block; margin: 0; padding: 0; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day { width: 14.28%; display: inline-block; cursor: pointer; box-sizing: border-box; list-style-type: none; padding: 1px;	}
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day .-details { width: 100%; text-align: center; box-sizing: border-box; color: #444; background-color: #f4f4f4; border: solid 1px #ddd; padding: 8px 6px 6px 6px; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day[today] .-details { font-weight: bolder; background-color: #ddd; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day:hover .-details, razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day[selected] .-details { background-color: #c8dbff; border: solid 1px #8db4fb; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day[disabled] .-details { opacity: 0.5; cursor: not-allowed; background: #fff; border: solid 1px #ddd; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day .-details .-date { font-size: 14px; line-height: 12px; display: block; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-day .-details .-day { font-size: 10px; padding-top: 0px; display: block; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-year { width: 20%; display: inline-block; cursor: pointer; box-sizing: border-box; list-style-type: none; padding: 1px;	}
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-year .-details { width: 100%; text-align: center; box-sizing: border-box; background-color: #f4f4f4; border: solid 1px #ddd; padding: 10px 6px 10px 6px; }
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-month { width: 25%; display: inline-block; cursor: pointer; box-sizing: border-box; list-style-type: none; padding: 1px;	}
+	razilo-date-picker razilo-modal .-container .-frame .-picker .-picker-month .-details { width: 100%; text-align: center; box-sizing: border-box; background-color: #f4f4f4; border: solid 1px #ddd; padding: 22px 6px 22px 6px; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-date-picker">
+	<razilo-modal bind-attributes="{'show': showModal, 'color': color}">
+		<main>
+			<div class="-container">
+		        <div class="-controls">
+					<button is="razilo-button" class="-clear" shape="round" color="orange" size="medium" bind-event="{'click': clear()}" icon><razilo-icon name="eraser"></razilo-icon></button>
+					<button is="razilo-button" size="medium" shape="round" color="grey" bind-event="{'click': previous()}" icon><razilo-icon name="chevron-left"></razilo-icon></button>
+					<div class="-tag-box">
+						<button class="-in-month" is="razilo-button" size="medium" shape="round" color="grey" bind-event="{'click': changeMode()}">
+							<span bind-text="date" alter-text="{'date': 'mmmm yyyy'}"></span>
+						</button>
+					</div>
+					<button is="razilo-button" size="medium" shape="round" color="grey" bind-event="{'click': next()}" icon><razilo-icon name="chevron-right"></razilo-icon></button>
+					<button is="razilo-button" class="-close" shape="round" color="red" size="medium" bind-event="{'click': hide()}" icon><razilo-icon name="times"></razilo-icon></button>
+		        </div>
+				<div class="-frame">
+			        <ul class="-picker" bind-show="mode" alter-show="{'equal': 'day'}">
+				        <li bind-for="days" bind-event="{'click': selectDay($value)}" bind-attributes="{'selected': $value.selected, 'today': $value.today, 'disabled': $value.disabled}" class="-picker-day">
+							<div class="-details">
+								<span class="-day" bind-text="$value.date" alter-text="{'date': 'ddd'}"></span>
+								<span class="-date" bind-text="$value.date" alter-text="{'date': 'dd'}"></span>
+							</div>
+						</li>
+			        </ul>
+			        <ul class="-picker" bind-show="mode" alter-show="{'equal': 'year'}">
+				        <li bind-for="years" bind-event="{'click': selectYear()}" class="-picker-year" bind-attributes="{'index': $key}">
+							<div class="-details">
+								<span class="-year" bind-text="$value"></span>
+							</div>
+						</li>
+			        </ul>
+			        <ul class="-picker" bind-show="mode" alter-show="{'equal': 'month'}">
+				        <li bind-for="months" bind-event="{'click': selectMonth()}" class="-picker-month" bind-attributes="{'index': $key}">
+							<div class="-details">
+								<span class="-month" bind-text="$value"></span>
+							</div>
+						</li>
+			        </ul>
+				</div>
+			</div>
+		</main>
+	</razilo-modal>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-date-picker', {
+		showModal: false,
+		format: 'yyyy-mm-dd',
+		color: 'white',
+		mode: 'day',
+
+		value: new Date(),
+		today: new Date(),
+		date: new Date(),
+
+		days: [],
+		years: [],
+		months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+
+		attached: function ()
+		{
+			this.format = this.getHost().getAttribute('format') || this.format;
+			this.color = this.getHost().getAttribute('color') || this.color;
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			switch (name)
+			{
+				case 'value':
+					var val = this.getHost().value;
+
+					if (val instanceof Date) this.value = val;
+					else if (!isNaN(newVal)) this.value = new Date(val);
+					else this.value = typeof val === 'string' ? new Date(Date.parse(val)) : new Date();
+				break;
+				case 'format':
+					this.format = newVal || 'yyyy-mm-dd';
+				break;
+				case 'color':
+					this.color = newVal;
+				break;
+				case 'show':
+					if (newVal === null) this.showModal = false;
+					else
+					{
+						this.showModal = true;
+						this.mode = 'day';
+						this.load();
+					}
+				break;
+			}
+		},
+
+		show: function()
+		{
+			this.getHost().setAttribute('show', '');
+		},
+
+		hide: function()
+		{
+			this.getHost().removeAttribute('show');
+		},
+
+		clear: function()
+		{
+			this.getHost().removeAttribute('show');
+			this.getHost().value = null;
+			this.fireEvent('change');
+		},
+
+		// Clears the calendar and shows the next month
+		next: function()
+		{
+			if (this.mode == 'day')
+			{
+				this.date.setMonth(this.date.getMonth() + 1);
+				this.date = new Date(this.date);
+				this.createMonth();
+			}
+			else if (this.mode == 'year')
+			{
+				var start = parseInt(this.years[24]) + 1;
+				this.years = [];
+				for (var i = start; i < start + 25; i++) this.years.push(i);
+			}
+
+			this.fireEvent('next' + this.mode);
+		},
+
+		// Clears the calendar and shows the previous month
+		previous: function()
+		{
+			if (this.mode == 'day')
+			{
+				this.date.setMonth(this.date.getMonth() - 1);
+				this.date = new Date(this.date);
+				this.createMonth();
+			}
+			else if (this.mode == 'year')
+			{
+				var start = parseInt(this.years[0]) - 25;
+				this.years = [];
+				for (var i = start; i < start + 25; i++) this.years.push(i);
+			}
+
+			this.fireEvent('previous' + this.mode);
+		},
+
+		load: function()
+		{
+			this.today = new Date();
+
+			// work out start point for calendar
+			var date = new Date();
+			date.setDate(1);
+			date.setMonth(this.value.getMonth());
+			date.setFullYear(this.value.getFullYear());
+			this.date = new Date(date);
+
+			// create months for calendar
+			this.createMonth();
+		},
+
+		// Creates and populates all of the days to make up the month
+		createMonth: function()
+		{
+			// chache current place
+			var cache = {day: this.date.getDate(), month: this.date.getMonth(), year: this.date.getFullYear()};
+
+			// always cash intensive arrays before setting to bound properties
+			var days = [];
+			while (this.date.getDay() != 1) this.date.setDate(this.date.getDate() - 1);
+
+			// do the first monday to get past loop
+			days.push({
+				'id': days.length,
+				'date': new Date(this.date),
+				'today': this.internalFormat(this.date) == this.internalFormat(this.today),
+				'selected': !!this.getHost().value && this.internalFormat(this.date) == this.internalFormat(this.value),
+				'disabled': this.date.getMonth() != cache.month
+			});
+			this.date.setDate(this.date.getDate() + 1);
+
+			// now loop until we hit the next monday that is not in the month we selected
+			while (!(this.date.getDay() == 1 && this.date.getMonth() != cache.month))
+			{
+				days.push({
+					'id': days.length,
+					'date': new Date(this.date),
+					'today': this.internalFormat(this.date) == this.internalFormat(this.today),
+					'selected': !!this.getHost().value && this.internalFormat(this.date) == this.internalFormat(this.value),
+					'disabled': this.date.getMonth() != cache.month
+				});
+				this.date.setDate(this.date.getDate() + 1);
+			}
+			this.days = days;
+
+			// reset the date object
+			this.date.setDate(cache.day);
+			this.date.setMonth(cache.month);
+			this.date.setFullYear(cache.year);
+		},
+
+		selectDay: function(ev, day)
+		{
+			if (day.disabled) return;
+			this.selected = new Date(this.days[day.id].date);
+			this.selectedDate = this.dateFormat(this.selected, 'yyyy-mm-dd');
+			this.getHost().value = new Date(this.days[day.id].date);
+			this.getHost().removeAttribute('show');
+			this.fireEvent('change');
+		},
+
+		selectYear: function(ev)
+		{
+			var el = ev.target;
+			while (!el.hasAttribute('index')) el = el.parentNode;
+			var index = el.getAttribute('index');
+
+			var dateObject = new Date();
+		    dateObject.setDate(this.date.getDate());
+		    dateObject.setMonth(this.date.getMonth());
+		    dateObject.setYear(this.years[index]);
+
+			this.date = dateObject
+			this.mode = 'month';
+		},
+
+		selectMonth: function(ev)
+		{
+			var el = ev.target;
+			while (!el.hasAttribute('index')) el = el.parentNode;
+			var index = el.getAttribute('index');
+
+			var dateObject = new Date();
+		    dateObject.setDate(this.date.getDate());
+		    dateObject.setMonth(index);
+		    dateObject.setYear(this.date.getFullYear());
+
+			this.date = dateObject
+			this.createMonth();
+			this.mode = 'day';
+		},
+
+		changeMode: function()
+		{
+			if (this.mode != 'day') this.mode = 'day';
+			else
+			{
+				var years = [];
+				var start = parseInt(this.date.getFullYear()) - 12;
+				for (var i = start; i < start + 25; i++) years.push(i);
+
+				this.years = years;
+				this.mode = 'year';
+			}
+		},
+
+		internalFormat: function(date)
+		{
+			return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+		}
+	});
+</script>

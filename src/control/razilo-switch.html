@@ -1,0 +1,58 @@
+<!--
+* raziloComponents
+* razilo-switch - Toggle switch
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- DEPENDANCIES -->
+<link rel="import" href="../base.html">
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-switch[disabled] razilo-icon { opacity: 0.5; cursor: not-allowed; }
+	razilo-switch razilo-icon.fa-toggle-on, razilo-switch razilo-icon.fa-toggle-off { font-size: 30px; line-height: 30px; cursor: pointer; }
+	razilo-switch razilo-icon[name='toggle-on'] { color: green; }
+	razilo-switch[on-color='red'] razilo-icon[name='toggle-on'] { color: red; }
+	razilo-switch[on-color='blue'] razilo-icon[name='toggle-on'] { color: blue; }
+	razilo-switch[on-color='orange'] razilo-icon[name='toggle-on'] { color: orange; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-switch">
+	<razilo-icon bind-attributes="{'name': icon}" bind-event="{'click': toggle()}"></razilo-icon>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-switch', {
+		value: 0,
+		icon: 'toggle-off',
+		disabled: false,
+
+		attached: function()
+		{
+			this.disabled = this.getHost().hasAttribute('disabled') ? true : false;
+			this.value = this.getHost().getAttribute('value') == 1 ? 1 : 0;
+			this.icon = this.value == 0 ? 'toggle-off' : 'toggle-on';
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			if (name == 'disabled') this.disabled = !newValue ? false: true;
+			if (name == 'value' && newVal != this.value) this.toggle();
+		},
+
+		toggle: function(ev)
+		{
+			if (this.disabled) return;
+
+			this.value = this.value == 0 ? 1 : 0;
+			this.icon = this.value == 0 ? 'toggle-off' : 'toggle-on';
+
+			this.getHost().value = this.value;
+			this.fireEvent('change');
+		}
+	});
+</script>
