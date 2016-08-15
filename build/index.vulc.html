@@ -11,8 +11,8 @@
 	    	this.addClasses();
 		},
 		attributeChanged: function(name, oldVal, newVal) {
-	    	if (name == 'class') return; // altered class directly
-	    	this.addClasses();
+	    	if (!newVal || ['name', 'size', 'rotate', 'stack', 'flip', 'fw', 'spin', 'pulse', 'inverse', 'border'].indexOf(name) < 0) return;
+			this.addClasses();
 		},
 		addClasses: function() {
 	        var className = ' fa';
@@ -58,6 +58,8 @@
 
 <!-- LOGIC -->
 <script>new RaziloComponent('razilo-tag')</script>
+<link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css">
+
 <!-- STYLE - Encapsulate all css to tag name -->
 <style>
 	razilo-choose { height: 30px; display: inline-block; }
@@ -401,7 +403,7 @@
 		iconFilled: 'star',
 		iconEmpty: 'star-o',
 		disabled: false,
-		stars: [],
+		stars: null,
 
 		attached: function()
 		{
@@ -411,11 +413,8 @@
 			if (this.getHost().hasAttribute('icon-filled')) this.iconFilled = this.getHost().getAttribute('icon-filled');
 			if (this.getHost().hasAttribute('icon-empty')) this.iconEmpty = this.getHost().getAttribute('icon-empty');
 			if (this.getHost().hasAttribute('size')) this.size = parseInt(this.getHost().getAttribute('size'));
-			if (this.getHost().hasAttribute('maximum'))
-			{
-				this.maximum = parseInt(this.getHost().getAttribute('maximum'));
-				this.createStars();
-			}
+			if (this.getHost().hasAttribute('maximum')) this.maximum = parseInt(this.getHost().getAttribute('maximum'));
+			this.createStars();
 		},
 
 		attributeChanged: function(name, oldVal, newVal)
@@ -433,15 +432,16 @@
 
 			if (name =='maximum')
 			{
-				this.maximum = newVal;
+				this.maximum = parseInt(newVal);
 				this.createStars();
 			}
 		},
 
 		createStars: function()
 		{
-			this.stars = [];
-			for (var i = 0; i < this.maximum; i++) this.stars.push(i < this.value ? this.iconFilled : this.iconEmpty);
+			var stars = [];
+			for (var i = 0; i < this.maximum; i++) stars.push(i < this.value ? this.iconFilled : this.iconEmpty);
+			this.stars = stars;
 		},
 
 		updateStars: function(ev, idx)
@@ -476,6 +476,8 @@
 
 		attached: function()
 		{
+			this.disabled = this.getHost().hasAttribute('disabled') ? true : false;
+			this.value = this.getHost().getAttribute('value') == 1 ? 1 : 0;
 			this.icon = this.value == 0 ? 'toggle-off' : 'toggle-on';
 		},
 
@@ -515,7 +517,7 @@
 		<button is="razilo-button" shape="round" color="grey" size="medium" bind-event="{'click': beginning()}" icon=""><razilo-icon name="angle-double-left"></razilo-icon></button>
 		<button is="razilo-button" shape="round" color="grey" size="medium" bind-event="{'click': pageLeft()}" icon=""><razilo-icon name="angle-left"></razilo-icon></button>
 		<razilo-tag shape="round" color="grey">
-			Page <input type="number" bind-value="value" bind-event="{'change': goTo()}">
+			Page <input type="text" bind-value="value" bind-event="{'change': goTo()}">
 			of <span bind-text="pages"></span>
 		</razilo-tag>
 		<button is="razilo-button" shape="round" color="grey" size="medium" bind-event="{'click': pageRight()}" icon=""><razilo-icon name="angle-right"></razilo-icon></button>
@@ -531,6 +533,8 @@
 
 		attached: function()
 		{
+			this.value = this.getHost().hasAttribute('value') ? parseInt(this.getHost().getAttribute('value')) : 1;
+			this.pages = this.getHost().hasAttribute('pages') ? parseInt(this.getHost().getAttribute('pages')) : 1;
 
 			this.resolveValues();
 		},
@@ -582,7 +586,8 @@
 
 		goTo: function()
 		{
-			if (this.value < 1) this.value = 1;
+			if (isNaN(this.value)) this.value = parseInt(this.getHost().value);
+			else if (this.value < 1) this.value = 1;
 			else if (this.value > this.pages) this.value = this.pages;
 
 			this.getHost().value = this.value;
@@ -744,8 +749,8 @@
 	@media (min-width: 500px) { razilo-modal { width: 70%; left: 15%; } razilo-modal[size='small'] { width: 50%; left: 25%; } razilo-modal[size='large'] { width: 90%; left: 5%; } }
 	@media (min-width: 800px) { razilo-modal { width: 60%; left: 20%; } razilo-modal[size='small'] { width: 40%; left: 30%; } razilo-modal[size='large'] { width: 80%; left: 10%; } }
 	@media (min-width: 1200px) { razilo-modal { width: 50%; left: 25%; } razilo-modal[size='small'] { width: 30%; left: 35%; } razilo-modal[size='large'] { width: 70%; left: 15%; } }
-	razilo-modal[animate-show] { display: block; -webkit-animation-name: -razilo-modal-show; -webkit-animation-duration: 0.25s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-modal-show; -moz-animation-duration: 0.25s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -ms-animation-name: -razilo-modal-show; -ms-animation-duration: 0.25s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -o-animation-name: -razilo-modal-show; -o-animation-duration: 0.25s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; animation-name: -razilo-modal-show; animation-duration: 0.25s; animation-iteration-count: 1; animation-timing-function: linear; }
-	razilo-modal[animate-hide] { display: block; -webkit-animation-name: -razilo-modal-hide; -webkit-animation-duration: 0.25s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-modal-hide; -moz-animation-duration: 0.25s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -ms-animation-name: -razilo-modal-hide; -ms-animation-duration: 0.25s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -o-animation-name: -razilo-modal-hide; -o-animation-duration: 0.25s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; animation-name: -razilo-modal-hide; animation-duration: 0.25s; animation-iteration-count: 1; animation-timing-function: linear; }
+	razilo-modal[animate-show] { display: block; -webkit-animation-name: -razilo-modal-show; -webkit-animation-duration: 0.25s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-modal-show; -moz-animation-duration: 0.25s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -moz-animation-fill-mode: forwards; -ms-animation-name: -razilo-modal-show; -ms-animation-duration: 0.25s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -ms-animation-fill-mode: forwards; -o-animation-name: -razilo-modal-show; -o-animation-duration: 0.25s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; -o-animation-fill-mode: forwards; animation-name: -razilo-modal-show; animation-duration: 0.25s; animation-iteration-count: 1; animation-timing-function: linear; animation-fill-mode: forwards; }
+	razilo-modal[animate-hide] { display: block; -webkit-animation-name: -razilo-modal-hide; -webkit-animation-duration: 0.25s; -webkit-animation-iteration-count: 1; -webkit-animation-timing-function: linear; -webkit-animation-fill-mode: forwards; -moz-animation-name: -razilo-modal-hide; -moz-animation-duration: 0.25s; -moz-animation-iteration-count: 1; -moz-animation-timing-function: linear; -moz-animation-fill-mode: forwards; -ms-animation-name: -razilo-modal-hide; -ms-animation-duration: 0.25s; -ms-animation-iteration-count: 1; -ms-animation-timing-function: linear; -ms-animation-fill-mode: forwards; -o-animation-name: -razilo-modal-hide; -o-animation-duration: 0.25s; -o-animation-iteration-count: 1; -o-animation-timing-function: linear; -o-animation-fill-mode: forwards; animation-name: -razilo-modal-hide; animation-duration: 0.25s; animation-iteration-count: 1; animation-timing-function: linear; animation-fill-mode: forwards; }
 	@-webkit-keyframes -razilo-modal-show { 0% { opacity: 0; } 100% { opacity: 1; } }
 	@-webkit-keyframes -razilo-modal-hide { 0% { opacity: 1; } 100% { opacity: 0; } }
 	@-moz-keyframes -razilo-modal-show { 0% { opacity: 0; } 100% { opacity: 1; } }
@@ -797,7 +802,7 @@
 					window.addEventListener('resize', this.resize.bind(this));
 					this.getHost().setAttribute('animate-show', '');
 					this.getHost().removeAttribute('animate-hide');
-					setTimeout(this.resize.bind(this), 1);
+					setTimeout(this.resize.bind(this), 10);
 				}
 				else
 				{
@@ -908,7 +913,6 @@
 <script>
 	new RaziloComponent('razilo-date-picker', {
 		showModal: false,
-		format: 'yyyy-mm-dd',
 		color: 'white',
 		mode: 'day',
 
@@ -922,7 +926,6 @@
 
 		attached: function ()
 		{
-			this.format = this.getHost().getAttribute('format') || this.format;
 			this.color = this.getHost().getAttribute('color') || this.color;
 		},
 
@@ -1435,10 +1438,10 @@
 	razilo-menu * { color: inherit; }
 	razilo-menu > ul > li { border-top: 1px solid rgba(0, 0, 0, 0.1); }
 	razilo-menu > ul > li:last-child { border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
-	razilo-menu ul li a { text-decoration: none; display: inherit; padding: 5px; font-size: 14px; line-height: 30px; cursor: pointer; color: inherit; opacity: 0.85; }
+	razilo-menu ul li a { outline: 0; text-decoration: none; display: inherit; padding: 5px; font-size: 14px; line-height: 30px; cursor: pointer; color: inherit; opacity: 0.85; }
 	razilo-menu ul li a razilo-icon { text-align: center; color: inherit; width: 2em; }
-	razilo-menu ul li[selected] > a { color: inherit; text-decoration: none; background-color: rgba(0, 0, 0, 0.1); }
-	razilo-menu ul li:hover > a { color: inherit; text-decoration: none; opacity: 1; }
+	razilo-menu ul li[selected] > a { outline: 0; color: inherit; text-decoration: none; background-color: rgba(0, 0, 0, 0.1); }
+	razilo-menu ul li:hover > a { outline: 0; color: inherit; text-decoration: none; opacity: 1; }
 	razilo-menu ul li ul li a { text-decoration: none; padding-left: 15px; }
 	razilo-menu ul li ul li ul li a { text-decoration: none; padding-left: 25px; }
 	razilo-menu ul li ul li ul li ul li a { text-decoration: none; padding-left: 35px; }

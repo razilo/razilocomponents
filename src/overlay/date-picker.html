@@ -83,7 +83,6 @@
 <script>
 	new RaziloComponent('razilo-date-picker', {
 		showModal: false,
-		format: 'yyyy-mm-dd',
 		color: 'white',
 		mode: 'day',
 
@@ -97,7 +96,6 @@
 
 		attached: function ()
 		{
-			this.format = this.getHost().getAttribute('format') || this.format;
 			this.color = this.getHost().getAttribute('color') || this.color;
 		},
 
