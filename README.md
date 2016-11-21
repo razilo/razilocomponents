@@ -139,6 +139,11 @@ For details on how to use the web components, please see the components.razilo.n
 The components are split into groups, with a extended components having a name that matches a current html element such as razilo-button (extends button) razilo-insert (is a custom element). Custom elements are used as any other html element, extended components are used by using the proper html element and extending it with an is attribute `is="razilo-button"`.
 
 
+# Demo
+
+For an example of using razilo components, please check out [rapp](https://github.com/ulsmith/rapp) which is a basic starting point for building a razilo based UI using raziloBind, raziloComponent running in a docker container.
+
+
 # Base Components
 
 
@@ -631,26 +636,92 @@ __methods__
 * __.razilobind.load()__ - Loads the modal based on internal reference of basepath and partial, use attributes to change these values and prmote auto load.
 
 
-## razilo-route (resource)
+## razilo-router (resource)
 
 
 ```html
-<razilo-route default="" value=""></razilo-route>
+<razilo-router default-route="one" not-found-route="404" value="one" push-state>
+    <razilo-router-route route="one" component="/src/app/one.component.html" component-name="app-one" cloak></razilo-router-route>
+    <razilo-router-route route="two" component="/src/app/two.component.html" component-name="app-two" cloak></razilo-router-route>
+    <razilo-router-route route="three" component="/src/app/three.component.html" component-name="app-three" cloak></razilo-router-route>
+    <razilo-router-route route="404" component-name="app-404" cloak></razilo-router-route>
+    <razilo-router-route route="aaa" url="https://www.google.co.uk" target="_blank"></razilo-router-route>
+    <razilo-router-route route="account/login" component="/src/app/account/login.component.html" component-name="app-account-login" cloak></razilo-router-route>
+</razilo-router>
 ```
 
+The default router for razilo, uses pushState routing (add a base ref to main index.html and get true non hash URL's with history for single page apps). If the browser does not support pushState, will fall back to a hashbang URL. This will allow you to create proper navigation around your application that looks native for all evergreen browsers and some IE version that support pushState.
+
+Simply create a router instance, set a default route to serve for the web root, set an optional not found route for everything else, set the push-state flag to turn on push state (required baseref tag to be set in your index.html) and then set your bound route using raziloBind bindings, 'route' will now carry the route being served and the route can be changed by changing the route variable.
+
+To use push state URL's, you will need to set a base ref in your root index.html file for your application as so.
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="/">
+		...
+	</head>
+	<body>
+	</body>
+</html>
+```
+
+Ensure your base tag is the first in the head section. Now all urls in the browser will be navigated to wihout a page reload when using the router to change route. You can change the router route by either altering the bound value ('route'), or by setting the routers value using normal element API's like element.setAttribute('value', 'somethingelse').
+
+To load the router with routes, you simply add `<razilo-router-route></razilo-router-route>` elements to the router...
+
+Things to think about here, how do you wan tto load components, pre load or lazy load. If you wan tro pre load, just load all components as dependences for the component using the router, then add a route and a component-name (the element tag name).
+
+Want to lazy load the component, you can do so by omiting the dependencies as above, then use the component attribute to specify the location of the of the component file, this will load the component once when clicked, after this initial load the
+component will be cached and will just show as normal.
+
+Other options include cloaking the component until ready, then fading in, using an external address as the endpoint and the ability to set the target type when loading external URL's.
+
+
+```html
+...
+<razilo-router-route route="one" component-name="my-component"></razilo-router-route>
+<razilo-router-route route="one" component-name="my-component" cloak></razilo-router-route>
+<razilo-router-route route="one" component="component/path.html" component-name="my-component" cloak></razilo-router-route>
+<razilo-router-route route="one" url="http://www.something.net" target="_blank"></razilo-router-route>
+...
+```
 
 A nice element to hold route for a single page app, pushing changes on value to url and vice versa. Uses hashbang routing on url path. Use this in conjunection with razilo-partial and razilo-menu to get single page app with routing.
 
 
-* __default__ - The route to use when no route is set, like your home page route.
-* __value__ - The route selected by the url, set this to promote a change to url hash bang route and vice versa.
+__razilo-router__
 
+
+* __default-route__ - The route to use when no route is set, like your home page route.
+* __not-found-route__ - The route to use when a route does not exist a 404 route.
+* __push-state__ - Add to enable push state URL's (omit for hashbang).
+* __value__ - Change this to set the route, will also reflect current route. Bind this value for to change dynamically with bind-value="".
 
 __events__
 
-
 * __change__ - Fired when partial hase finished being rendered onto screen.
 * __attributechanged__ - Fired when a change to the attribute happens, contains detail of changes in event.detail.
+
+__methods__
+
+* __.changeRoute(string)__ - Change the route by sending in the string name of the route you wan to go to.
+
+__properties__
+
+* __.value__ - The route selected.
+
+
+__razilo-router-route__
+
+
+* __route__ - The route you want to asign.
+* __component-name__ - The component name or tag name of the element you want to load.
+* __component__ - Add component file location to enable lazy loading component.
+* __url__ - Use this to push to an external URL, this will force a reload in push state mode when hitting a relative link.
+* __target__ - Set the target for external URL, such as \_blank.
 
 
 # Structure Components
@@ -660,62 +731,111 @@ __events__
 
 
 ```html
-<razilo-menu side-logo="" side-logo-test="" top-logo="" top-logo-text="" children="" position="" home="" model="" value=""></razilo-menu>
+<razilo-menu home="one/six" side-logo="/assets/images/blade-white-50-circle.png" top-logo="/assets/images/blade-white-200-circle.png" side-logo-text="side hello" top-logo-text="top hello" bind-value="route">
+	<razilo-menu-quicklinks>
+		...
+		<razilo-menu-quicklink icon="refresh" title="refresh" route="aaa" bind-value="route"></razilo-menu-quicklink>
+		...
+	</razilo-menu-quicklinks>
+	<razilo-menu-links>
+		...
+		<razilo-menu-link icon="dashboard" route="one/six" bind-value="route">One</razilo-menu-link>
+		...
+	</razilo-menu-links>
+	<razilo-menu-footer>
+		<span class="copyright">© Your Company</span>
+	</razilo-menu-footer>
+</razilo-menu>
 ```
 
 
-Displays a mobile friendly left/right hand menu that takes up full length of the screen. When screen shrinks to mobile layout, menu changes to top menu with toggle menu icon. Menus can be nested up to 5 children and can also have navigable or benign parents (by omiting the route completely). To finsh off, you can add logo text that will automatically direct the user to home. Style the menu directly to have alter color, font etc. Data can either be set on model attribute as a valid JSON string (by using single quotes as the model attribute quotes, e.g. model='[{...}]') or can be set by altering the element.model property to a valid object. Use this in conjunction with razilo-page and razilo-route to create a basic page structure of menu and page area.
+Displays a mobile friendly left hand menu that takes up full length of the screen minimum or tracks the page length maximum. When screen shrinks to mobile layout, menu changes to top menu with toggle menu icon. You can add logo text that will automatically direct the user to home. Style the menu directly to have a different color, font etc. Menu items, quick links and footer data can be set using the child custom elements as above. Use this in conjunction with razilo-page and razilo-router to create a basic page structure of menu and page area.
+
+To add a quick link...
 
 
+```html
+...
+<razilo-menu-quicklinks>
+	...
+	<razilo-menu-quicklink icon="raziloIconName" route="route/to/set/on/value" value=""></razilo-menu-quicklink>
+	...
+</razilo-menu-quicklinks>
+...
+```
+
+To add a menu link...
+
+
+```html
+...
+<razilo-menu-links>
+	...
+	<razilo-menu-link icon="raziloIconName" route="route/to/set/on/value" value="">One</razilo-menu-link>
+	...
+</razilo-menu-links>
+...
+```
+
+To add a footer that always shows at bottom...
+
+
+```html
+...
+<razilo-menu-footer>
+	<span class="copyright">© Your Company</span>
+</razilo-menu-footer>
+...
+```
+
+
+__razilo-menu__
+
+* __home__ - The default route to go to when none is set i.e. your home page.
 * __side-logo__ - Path to a logo image to use in menu when showing side menu.
 * __side-logo-text__ - Any logo text to display under logo and above menu when showing side menu.
 * __top-logo__ - Path to a logo image to use in top menu when showing top menu.
 * __top-logo-text__ - Any logo text to display after logo when showing top menu.
-* __children__ - Set to expandable to have child menu items hidden until parent is clicked.
-* __position__ - Place menu on left or right side of the screen.
-* __home__ - The default route to go to when none is set i.e. your home page.
-* __model__ - The menu items to display as a JSON string, use single quotes for model='' to ensure you get a valid JSON string.
-* __value__ - The value selected by the menu, set to update menu item selected, detect change and read value to pick up new selection by user.
-
-
-Example of data structure for menus...
-
-```json
-model: [
-	{"route":"one","label":"One long menu item","icon":"trash","menuItems":[
-		{"route":"aaa","label":"AAA","icon":"spinner"},
-		{"label":"BBB","icon":"car","menuItems":[
-			{"route":"1111","label":"1111","icon":"cog"},
-			{"route":"2222","label":"2222","icon":"home"}
-		]}
-	]},
-	{"route":"two","label":"Two","icon":"refresh"},
-	{"route":"three","label":"Three","icon":"user"}
-]
-```
+* __value__ - The value selected by the menu, set to update menu item selected, detect change and read value to pick up new selection by user, use with bind-value="" to dynaically adjust a route.
 
 __events__
 
-
+* __change__ - Fired when value is updated via a click on logo, menu items quick links etc.
 * __attributechanged__ - Fired when a change to the attribute happens, contains detail of changes in event.detail.
-
 
 __properties__
 
-
 * __.value__ - The menu item selected.
 * __.razilobind.model__ - The menu items to display as an array of objects containing label, route [optional], icon [optional], menuItems [optional] (use same structure for child menus).
+
+
+__razilo-menu-quicklinks > razilo-menu-quicklink__
+
+* __icon__ - The icon to use for the quicklink as per razilo-icon.
+* __route__ - The route to set the value to, click this to assign this route to razilo-menu-quicklink.value.
+* __value__ - The value of route once clicked, bind to this with bind.value="" to dynamically change a common variable on click.
+
+
+__razilo-menu-links > razilo-menu-link__
+
+* __icon__ - The icon to use for the link if yo uwant one as per razilo-icon.
+* __route__ - The route to set the value to, click this to assign this route to razilo-menu-link.value.
+* __value__ - The value of route once clicked, bind to this with bind.value="" to dynamically change a common variable on click.
 
 
 ## razilo-page (structure)
 
 
 ```html
-<razilo-page position="right"></razilo-page>
+<razilo-page layout="notice" logo="/assets/images/blade-white-50-circle.png" logo-name="Boom">
+	<p>Component APP 404</p>
+</razilo-page>
 ```
 
 
-Works along side razilo-menu to provide an area for page/application content to be placed. Places content in a scrollable area that adapts to mobile views along with razilo-menu. Set to left or right side of page when menu is always visible. If you use a left menu, use a right page and vice versa.
+Works along side razilo-menu to provide an area for page/application content to be placed. Places content in a scrollable area that adapts to mobile views along with razilo-menu. This automatically creates a scrollable area that sits at the side fo the menu or below it in mobile view. The page element comes with a few layouts to help you out, page, notice and wizard which can show a log and log alt text.
 
 
-* __position__ - Place page on left or right side of the screen.
+* __layout__ - The layout of the page as "page" (works alongside menu), "notice" (full screen with no menu and header) and "wizard" (full screen bordered with header area).
+* __logo__ - The log to show in notice or wizard mode.
+* __logo-name__ - The alt text for the log to show in notice or wizard mode.

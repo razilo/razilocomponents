@@ -1,0 +1,187 @@
+<!--
+* raziloComponents
+* razilo-router - Sets and gets application routing using hashbang rounting
+* @author Paul Smith (smiffy6969)
+* @site component.razilo.net
+* @licence MIT
+-->
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-router, razilo-router .-outlet { margin: 0px; padding: 0px; width: inherit; display: block; }
+	razilo-router .-routes { display: none; }
+</style>
+
+<!-- TEMPLATE -->
+<template id="razilo-router">
+	<div class="-routes">
+		<content></content>
+	</div>
+	<div class="-outlet"></div>
+</template>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-router', {
+		ready: false,
+		value: null,
+		protocol: null,
+		host: null,
+		port: null,
+		defaultRoute: null,
+		notFoundRoute: null,
+		basepath: null,
+		pushState: null,
+
+		created: function() {
+			this.defaultRoute = this.getHost().getAttribute('default-route') || this.defaultRoute;
+			this.notFoundRoute = this.getHost().getAttribute('not-found-route') || this.notFoundRoute;
+			this.basepath = this.getHost().hasAttribute('basepath') ? this.getHost().getAttribute('basepath').replace(/http:\/\/|https:\/\//, '') : this.basepath;
+			this.pushState = this.getHost().hasAttribute('push-state');
+		},
+
+		attached: function()
+		{
+			// set up config
+			this.protocol = window.location.protocol;
+			this.host = window.location.host;
+			this.port = window.location.port;
+			var value = window.location.hash.replace(/#|!/g, '');
+
+			// check for push state
+			if (this.pushState && history.pushState && history.replaceState) {
+				var base = document.querySelector('base');
+				if (!base) throw 'Cannot use push state without base ref set in index page, please set <base href="/">';
+				var baseRef = base.getAttribute('href');
+				if (!baseRef) throw 'Cannot use push state without base ref set in index page, please set <base href="/">';
+
+				var pointer = window.location.pathname.indexOf(baseRef) + baseRef.length;
+				value = window.location.pathname.substring(pointer, window.location.pathname.length);
+				history.replaceState({'route': value || this.defaultRoute}, '', value || this.defaultRoute);
+			} else this.pushState = false;
+
+			// set value
+			this.ready = true;
+			this.getHost().setAttribute('value', value || this.defaultRoute);
+
+			// watch for back and forwards
+			window.addEventListener('popstate', this.historyChanged.bind(this));
+		},
+
+		detached: function()
+		{
+			window.removeEventListener('popstate', this.historyChanged);
+		},
+
+		attributeChanged: function(name, oldVal, newVal)
+		{
+			switch (name)
+			{
+				case 'default-route':
+					this.defaultRoute = newVal;
+				break;
+				case 'not-found-route':
+					this.notFoundRoute = newVal;
+				break;
+				case 'basepath':
+					this.basepath = newVal ? newValue.replace(/http:\/\/|https:\/\//, '') : '';
+				break;
+				case 'push-state':
+					this.pushState = newVal !== null && history.pushState && history.replaceState ? true : false;
+				break;
+				case 'value':
+					if (this.ready) {
+						this.value = typeof newVal !== 'undefined' && newVal.length > 0 ? newVal : this.defaultRoute;
+						this.changeRoute();
+					}
+				break;
+			}
+		},
+
+		historyChanged: function(route)
+		{
+			var value = this.pushState ? route.state.route || this.defaultRoute : window.location.hash.replace(/#|!/g, '');
+			this.getHost().setAttribute('value', value);
+		},
+
+		changeRoute: function()
+		{
+			// get route, if url, then do this and return
+			var route = this.getRoute();
+
+			// if url route, divert off
+			if (route.getAttribute('url')) return this.updateUrl(route);
+
+			// component route
+			this.updateComponent(route);
+
+			// set state
+			this.setLocation();
+
+			// update value and issue change
+			this.getHost().value = this.value;
+			this.fireEvent('change');
+		},
+
+		getRoute: function()
+		{
+			var route = this.getHost().querySelector('razilo-router-route[route="' + this.value + '"]');
+			if (!route && this.notFoundRoute) route = this.getHost().querySelector('razilo-router-route[route="' + this.notFoundRoute + '"]');
+			if (!route) throw 'No route found and not-found-route not configured, please configure a not-found-route';
+
+			return route;
+		},
+
+		setLocation: function()
+		{
+			if (this.pushState) {
+				if (history.state.route !== this.value) history.pushState({'route': this.value}, '', this.value);
+			} else {
+				var newLoc = this.protocol + '//' + this.host + (window.location.port ? ':' + window.location.port : '') + '/#!' + this.value;
+				if (typeof this.value === 'string' && this.value.length > 0 && window.location.href != newLoc) window.location.href = newLoc;
+			}
+		},
+
+		updateUrl: function(route) {
+			if (!route.hasAttribute('target')) window.location.href = route.getAttribute('url');
+			else window.open(route.getAttribute('url'), route.getAttribute('target'));
+		},
+
+		updateComponent: function(route) {
+			// get details and check
+			var component = route.getAttribute('component');
+			var name = route.getAttribute('component-name');
+			if (!name) throw 'No route attribute "component-name" set, please set your component name on route e.g. component-name="my-component" on ' + route.outerHTML;
+			if (name.indexOf('-') < 0) throw 'Bad route attribute "component-name" set, please use a custom element name with a hyphon in it as per web component specs on ' + route.outerHTML;
+
+			// try to create, load if not loaded
+			element = document.createElement(name.toUpperCase());
+			if (route.hasAttribute('cloak')) element.setAttribute('cloak', '');
+			if (!element.razilobind) this.loadComponent(component);
+
+			// patch in component
+			var outlet = this.getHost().querySelector('.-outlet');
+			outlet.innerHTML = '';
+			outlet.appendChild(element);
+
+			// unlcoak if cloaked
+			if (route.hasAttribute('cloak')) setTimeout(function() { element.setAttribute('cloak', 'false') }, 25);
+		},
+
+		loadComponent: function(component)
+		{
+			// retrict component paths to html, htm files only
+			if (!component || ['htm', 'html'].indexOf(component.split('.').pop().toLowerCase()) < 0) throw 'Bad route attribute "component" set, ensure component attribute points to a .htm or .html component file on ' + route.outerHTML;
+
+			// set full path
+			var basepath = this.basepath === null ? '' : (this.basepath.substr(-1) !== '/' ? this.basepath : this.basepath.substring(0, this.basepath.length - 1));
+			var path = basepath + (basepath.length > 1 ? '/' : '') + component;
+
+			// inject component in head
+			var link = document.createElement('LINK');
+			link.setAttribute('rel', 'import');
+			link.setAttribute('href', path);
+			document.querySelector('head').appendChild(link);
+		}
+	});
+</script>

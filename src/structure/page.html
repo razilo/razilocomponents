@@ -8,10 +8,64 @@
 
 <!-- STYLE - Encapsulate all css to tag name -->
 <style>
-	razilo-page { padding: 0px 0px 0px 225px; position: absolute; height: 100%; width: 100%; box-sizing: border-box; }
-	razilo-page[position="left"] { padding: 0px 225px 0px 0px; }
-	@media (max-width: 720px) { razilo-page { padding: 40px 0px 0px 0px; height: auto; overflow: initial; } }
+	razilo-page { display: block; width: inherit; box-sizing: border-box; }
+	razilo-page .logo { display: none; }
+	razilo-page .adjuster { display: inline-block; }
+	razilo-page[layout="page"] { padding: 0px 0px 0px 225px; min-height: 100%; height: auto; }
+	razilo-page[layout="wizard"] { position: absolute; z-index: 1001; min-height: 100%; padding: 100px 40px 40px 40px; top: 0px; left: 0px; }
+	razilo-page[layout="wizard"] .adjuster { width: inherit; background-color: #fafafa; }
+	razilo-page[layout="wizard"] .logo { display: block; max-height: 60px; position: absolute; top: 0px; left: 40px; -webkit-transform: translate(0%, 50%); -moz-transform: translate(0%, 50%); -o-transform: translate(0%, 50%); transform: translate(0%, 50%); }
+	razilo-page[layout="notice"] { position: absolute; z-index: 1001; padding-top: 100px; }
+	razilo-page[layout="notice"] .adjuster { width: inherit; background-color: #fafafa; }
+	razilo-page[layout="notice"] .logo { display: block; max-height: 60px; position: absolute; top: 0px; left: 10px; -webkit-transform: translate(0%, 50%); -moz-transform: translate(0%, 50%); -o-transform: translate(0%, 50%); transform: translate(0%, 50%); }
+	@media (max-width: 720px) { razilo-page[layout="page"] { padding: 40px 0px 0px 0px; height: auto; overflow: initial; }}
 </style>
 
+<!-- TEMPLATE -->
+<template id="razilo-page">
+	<img class="logo" bind-show="logo" bind-src="logo" bind-attributes="{'alt': logoName}"/>
+	<div class="adjuster" bind-style="{'min-height': adjusterHeight}"><content></content></div>
+</template>
+
 <!-- LOGIC -->
-<script>new RaziloComponent('razilo-page')</script>
+<script>
+	new RaziloComponent('razilo-page', {
+		layout: '',
+		logo: '',
+		logoName: '',
+		adjusterHeight: '',
+
+		attached: function() {
+			this.layout = this.getHost().getAttribute('layout') || this.layout;
+			this.logo = this.getHost().getAttribute('logo') || this.logo;
+			this.logoName = this.getHost().getAttribute('logo-name') || this.logoName;
+
+			this.setMinHeight();
+			window.addEventListener('resize', this.setMinHeight.bind(this));
+		},
+
+		detached: function() {
+			window.removeEventListener('resize', this.setMinHeight.bind(this));
+		},
+
+		setMinHeight: function() {
+			var menu = document.querySelector('razilo-menu');
+			this.getHost().style.minHeight =  window.innerHeight + 'px';
+
+			if (this.layout === 'wizard')
+			{
+				this.adjusterHeight = window.innerHeight - 140 + 'px';
+				if (menu) menu.style.display = 'none';
+			}
+			else if (this.layout === 'notice')
+			{
+				this.adjusterHeight = window.innerHeight - 100 + 'px';
+				if (menu) menu.style.display = 'none';
+			}
+			else
+			{
+				if (menu) menu.style.display = '';
+			}
+		}
+	});
+</script>
