@@ -66,6 +66,9 @@
 
 			// watch for back and forwards
 			window.addEventListener('popstate', this.historyChanged.bind(this));
+
+			// expose change route
+			this.getHost().changeRoute = this.changeRoute.bind(this);
 		},
 
 		detached: function()
@@ -90,10 +93,7 @@
 					this.pushState = newVal !== null && history.pushState && history.replaceState ? true : false;
 				break;
 				case 'value':
-					if (this.ready) {
-						this.value = typeof newVal !== 'undefined' && newVal.length > 0 ? newVal : this.defaultRoute;
-						this.changeRoute();
-					}
+					if (this.ready) this.changeRoute(newVal);
 				break;
 			}
 		},
@@ -104,8 +104,11 @@
 			this.getHost().setAttribute('value', value);
 		},
 
-		changeRoute: function()
+		changeRoute: function(name)
 		{
+			// set value
+			this.value = typeof name !== 'undefined' && name.length > 0 ? name : this.defaultRoute;
+
 			// get route, if url, then do this and return
 			var route = this.getRoute();
 
