@@ -1438,6 +1438,9 @@
 
 			// watch for back and forwards
 			window.addEventListener('popstate', this.historyChanged.bind(this));
+
+			// expose change route
+			this.getHost().changeRoute = this.changeRoute.bind(this);
 		},
 
 		detached: function()
@@ -1462,10 +1465,7 @@
 					this.pushState = newVal !== null && history.pushState && history.replaceState ? true : false;
 				break;
 				case 'value':
-					if (this.ready) {
-						this.value = typeof newVal !== 'undefined' && newVal.length > 0 ? newVal : this.defaultRoute;
-						this.changeRoute();
-					}
+					if (this.ready) this.changeRoute(newVal);
 				break;
 			}
 		},
@@ -1476,8 +1476,11 @@
 			this.getHost().setAttribute('value', value);
 		},
 
-		changeRoute: function()
+		changeRoute: function(name)
 		{
+			// set value
+			this.value = typeof name !== 'undefined' && name.length > 0 ? name : this.defaultRoute;
+
 			// get route, if url, then do this and return
 			var route = this.getRoute();
 
@@ -1554,6 +1557,94 @@
 			link.setAttribute('rel', 'import');
 			link.setAttribute('href', path);
 			document.querySelector('head').appendChild(link);
+		}
+	});
+</script>
+<style>
+	razilo-store { display: none !important; }
+</style>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-store', {
+		created: function()
+		{
+			this.getHost().getItem = this.getItem.bind(this);
+			this.getHost().setItem = this.setItem.bind(this);
+			this.getHost().deleteItem = this.deleteItem.bind(this);
+		},
+
+		getItem: function(key)
+		{
+			// blank key
+			if (!key || localStorage.length < 1) return undefined;
+
+			// full key exists
+			if (localStorage['razilo.store.' + key] !== undefined) return JSON.parse(localStorage['razilo.store.' + key]);
+
+			// find all values from this key onwards
+			var obj = {};
+			for (let name in localStorage) {
+				if (name.indexOf('razilo.store.' + key) !== 0) continue;
+
+				// build up obj
+				let temp, parts, part;
+				temp = obj;
+				parts = name.substring(('razilo.store.' + key).length +1, name.length).split('.');
+				while (parts.length) {
+					part = parts.shift();
+					if (!temp[part]) temp[part] = {};
+					if (parts.length === 0) temp[part] = JSON.parse(localStorage[name]);
+					temp = temp[part];
+				}
+			}
+
+			return Object.keys(obj).length > 0 ? obj : undefined;
+		},
+
+		setItem: function(key, value)
+		{
+			// blank key or value
+			if (!key || typeof key !== 'string' || key.charAt(key.length -1) == '.' || value === undefined) return false;
+
+			// clear out keys and set values
+			this.deleteItem(key);
+			if (typeof value === 'object') {
+				for (var name in value) {
+					this.setItem(key + '.' + name, value[name]);
+				}
+			} else {
+				// this.deleteItem(key)
+				localStorage['razilo.store.' + key] = JSON.stringify(value);
+
+				// clean up parents if we added or changed a child as parents are objects and shouldn't be present anyway
+				var parts = key.split('.');
+				var part = '';
+				while (parts.length > 1) {
+					part += '.' + parts.shift();
+					localStorage.removeItem('razilo.store' + part);
+				}
+			}
+
+			return true;
+		},
+
+		deleteItem: function(key)
+		{
+			// blank key or value
+			var result = false;
+			if (!key || typeof key !== 'string' || key.charAt(key.length -1) == '.') return result;
+
+			// remove value
+			if (localStorage['razilo.store.' + key]) result = localStorage.removeItem('razilo.store.' + key);
+
+			// remove children
+			for (let name in localStorage) {
+				if (name.indexOf('razilo.store.' + key + '.') !== 0) continue;
+				result = localStorage.removeItem(name);
+			}
+
+			return result;
 		}
 	});
 </script>

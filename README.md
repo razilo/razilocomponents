@@ -839,3 +839,26 @@ Works along side razilo-menu to provide an area for page/application content to 
 * __layout__ - The layout of the page as "page" (works alongside menu), "notice" (full screen with no menu and header) and "wizard" (full screen bordered with header area).
 * __logo__ - The log to show in notice or wizard mode.
 * __logo-name__ - The alt text for the log to show in notice or wizard mode.
+
+
+## razilo-store (service)
+
+
+```html
+<razilo-store></razilo-store>
+```
+
+
+Works as a service giving you access to a localStorage backed data store for things like application state. Gone are the days when application state is shoved in the URL, application state these days is backed to localStorage object in the browser. What does this componenent do? Well it's a service worker so it has no template, no display in the dom, it's used as a place marker to access local storage.
+
+Unlike local storage though, that is key value storage, razilo-store works in a more usefull objecty way, setting and getting the store data as objects, strings, booleans or numbers which are all type forced on read. Put a true in, get a true out and not 'true'!
+
+All data is typed via JSON encoding the actual values, unlike other storage tools, we do not force one large blob or cache the data, we read and write live to locaStorage in dot notation, storaing each value as a single key value pair addressed using dot notation as the key ala 'foo.bar.baz'. You can set objects, strings booleans or numbers and they will all be converted to stringed dot notation.
+
+Use the service worker by targetting the element inthe dom and using the methods mapped to the elements api such as `document.querySelector('razilo-store').getItem('foo.bar.baz')`.
+
+__methods__
+
+* __.getItem(key[string])__ - Get a store item using dot notation referenced key 'foo.bar.baz'. Returns mixed types.
+* __.setItem(key[string], value[mixed])__ - Set a store item using dot notation referenced key such as 'foo.bar.baz'. Returns boolean true on success false on fail.
+* __.deleteItem(key[string])__ - Delete a store item using dot notation referenced key such as 'foo.bar.baz'. Returns boolean true on success false on fail.
