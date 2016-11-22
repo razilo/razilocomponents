@@ -721,7 +721,10 @@ __razilo-router-route__
 * __component-name__ - The component name or tag name of the element you want to load.
 * __component__ - Add component file location to enable lazy loading component.
 * __url__ - Use this to push to an external URL, this will force a reload in push state mode when hitting a relative link.
-* __target__ - Set the target for external URL, such as \_blank.## razilo-store (resource)
+* __target__ - Set the target for external URL, such as \_blank.
+
+
+## razilo-store (resource)
 
 
 ```html
