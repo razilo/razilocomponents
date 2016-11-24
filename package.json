@@ -1,12 +1,12 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "name": "razilocomponents",
   "description": "raziloComponents HTML web components created using the raziloComponent helper library.",
   "author": "Paul Smith (smiffy6969)",
   "homepage": "http://component.razilo.net",
   "license": "MIT",
   "dependencies": {
-      "razilocomponent": "^1.0.0",
+      "razilocomponent": "^1.0.1",
 	  "font-awesome": "^4.6.3"
   },
   "devDependencies": {

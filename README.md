@@ -654,7 +654,8 @@ The default router for razilo, uses pushState routing (add a base ref to main in
 
 Simply create a router instance, set a default route to serve for the web root, set an optional not found route for everything else, set the push-state flag to turn on push state (required baseref tag to be set in your index.html) and then set your bound route using raziloBind bindings, 'route' will now carry the route being served and the route can be changed by changing the route variable.
 
-To use push state URL's, you will need to set a base ref in your root index.html file for your application as so.
+To use push state URL's, you will need to set a base ref in your root index.html file for your application as so. To test a component with an embedded router, it may be required for you to disable location mapping, to do this ensure your test fixture has
+a `<base disabled>` registered to disable base routing and location mapping during testing.
 
 ```html
 <!DOCTYPE html>

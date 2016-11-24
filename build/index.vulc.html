@@ -1395,6 +1395,7 @@
 <!-- LOGIC -->
 <script>
 	new RaziloComponent('razilo-router', {
+		disabled: false,
 		ready: false,
 		value: null,
 		protocol: null,
@@ -1423,13 +1424,21 @@
 			// check for push state
 			if (this.pushState && history.pushState && history.replaceState) {
 				var base = document.querySelector('base');
-				if (!base) throw 'Cannot use push state without base ref set in index page, please set <base href="/">';
-				var baseRef = base.getAttribute('href');
-				if (!baseRef) throw 'Cannot use push state without base ref set in index page, please set <base href="/">';
-
-				var pointer = window.location.pathname.indexOf(baseRef) + baseRef.length;
-				value = window.location.pathname.substring(pointer, window.location.pathname.length);
-				history.replaceState({'route': value || this.defaultRoute}, '', value || this.defaultRoute);
+				if (base) {
+					this.disabled = base.hasAttribute('disabled');
+					var baseRef = base.getAttribute('href');
+					if (baseRef) {
+						var pointer = window.location.pathname.indexOf(baseRef) + baseRef.length;
+						value = window.location.pathname.substring(pointer, window.location.pathname.length);
+						history.replaceState({'route': value || this.defaultRoute}, '', value || this.defaultRoute);
+					} else {
+						console.log('NOTICE: Cannot use push state without base href being set in index page, please set <base href="/">');
+						this.pushState = false;
+					}
+				} else {
+					console.log('NOTICE: Cannot use push state, please set <base href="/"> in index page');
+					this.pushState = false;
+				}
 			} else this.pushState = false;
 
 			// set value
@@ -1509,6 +1518,8 @@
 
 		setLocation: function()
 		{
+			if (this.disabled) return;
+
 			if (this.pushState) {
 				if (history.state.route !== this.value) history.pushState({'route': this.value}, '', this.value);
 			} else {
