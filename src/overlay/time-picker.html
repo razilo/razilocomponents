@@ -71,6 +71,8 @@
 			this.format = this.getHost().getAttribute('format') || this.format;
 			this.color = this.getHost().getAttribute('color') || this.color;
 			this.setFormat();
+			this.getHost().show = this.show();
+			this.getHost().hide = this.hide();
 		},
 
 		attributeChanged: function(name, oldVal, newVal)
@@ -88,6 +90,7 @@
 					this.color = newVal;
 				break;
 				case 'show':
+				case 'toggle':
 					if (newVal === null) this.showModal = false;
 					else
 					{
@@ -128,6 +131,7 @@
 		hide: function()
 		{
 			this.getHost().removeAttribute('show');
+			this.getHost().removeAttribute('toggle');
 		},
 
 		setHour: function(ev, val)

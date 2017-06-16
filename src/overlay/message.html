@@ -59,9 +59,15 @@
 		timer: null,
 		delay: 4100,
 
+		attached: function ()
+		{
+			this.getHost().show = this.show();
+			this.getHost().hide = this.hide();
+		},
+
 		attributeChanged: function(name, oldVal, newVal)
 		{
-			if (name == 'show' && newVal !== null) {
+			if ((name == 'show' || name == 'toggle') && newVal !== null) {
 				this.fireEvent('show');
 
 				if (this.getHost().hasAttribute('animate-a')) {
@@ -74,6 +80,7 @@
 
 				this.getHost().removeAttribute('persist');
 				this.getHost().removeAttribute('show');
+				this.getHost().removeAttribute('toggle');
 				this.setTimer();
 			}
 
@@ -82,6 +89,12 @@
 
 		show: function() {
 			this.getHost().setAttribute('show', '');
+		},
+
+		hide: function()
+		{
+			this.getHost().removeAttribute('show');
+			this.getHost().removeAttribute('toggle');
 		},
 
 		setTimer: function() {

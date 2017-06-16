@@ -97,6 +97,8 @@
 		attached: function ()
 		{
 			this.color = this.getHost().getAttribute('color') || this.color;
+			this.getHost().show = this.show();
+			this.getHost().hide = this.hide();
 		},
 
 		attributeChanged: function(name, oldVal, newVal)
@@ -117,6 +119,7 @@
 					this.color = newVal;
 				break;
 				case 'show':
+				case 'toogle':
 					if (newVal === null) this.showModal = false;
 					else
 					{
@@ -136,11 +139,13 @@
 		hide: function()
 		{
 			this.getHost().removeAttribute('show');
+			this.getHost().removeAttribute('toggle');
 		},
 
 		clear: function()
 		{
 			this.getHost().removeAttribute('show');
+			this.getHost().removeAttribute('toggle');
 			this.getHost().value = null;
 			this.fireEvent('change');
 		},
