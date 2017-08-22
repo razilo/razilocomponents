@@ -13,6 +13,8 @@
 
 <style>
 	razilo-menu-links { margin: 0px; padding: 0px; display: block; color: inherit; list-style-type: none; border-bottom: 1px solid rgba(0, 0, 0, 0.2); }
+	razilo-menu-links[sub-menu] { display: none; }
+	razilo-menu-links[sub-menu][active] { display: block; }
 </style>
 
 <template id="razilo-menu-links">
@@ -27,7 +29,11 @@
 
 <style>
 	razilo-menu-link { display: block; border-top: 1px solid rgba(0, 0, 0, 0.2); }
-	razilo-menu-link .link-item { padding: 10px 6px; font-size: inherit; line-height: inherit; cursor: pointer; color: inherit; opacity: 0.85; font-family: inherit; }
+	razilo-menu-link .link-item { padding: 10px 5px; font-size: inherit; line-height: inherit; cursor: pointer; color: inherit; opacity: 0.85; font-family: inherit; }
+	razilo-menu-links razilo-menu-links razilo-menu-link .link-item { padding: 10px 15px; }
+	razilo-menu-links razilo-menu-links razilo-menu-links razilo-menu-link .link-item { padding: 10px 25px; }
+	razilo-menu-links razilo-menu-links razilo-menu-links razilo-menu-links razilo-menu-link .link-item { padding: 10px 35px; }
+	razilo-menu-links razilo-menu-links razilo-menu-links razilo-menu-links razilo-menu-links razilo-menu-link .link-item { padding: 10px 45px; }
 	razilo-menu-link[active] .link-item { outline: 0; color: inherit; text-decoration: none; background-color: rgba(0, 0, 0, 0.2); }
 	razilo-menu-link:hover .link-item { outline: 0; color: inherit; text-decoration: none; opacity: 1; text-shadow: 0px 0px 6px rgba(150, 150, 150, 1); }
 </style>
@@ -44,11 +50,15 @@
 		icon: '',
 		route: '',
 		value: '',
+		subMenu: '',
 
 		attached: function() {
 			this.icon = this.getHost().getAttribute('icon') || this.icon;
 			this.route = this.getHost().getAttribute('route') || this.route;
 			this.value = this.getHost().getAttribute('value') || this.value;
+			this.subMenu = this.getHost().getAttribute('sub-menu') || this.subMenu;
+
+
 		},
 
 		attributeChanged: function(name, oldVal, newVal)
@@ -58,15 +68,47 @@
 				case 'icon': this.icon = newVal; break;
 				case 'route': this.topLogo = newVal; break;
 				case 'value': this.value = newVal; break;
+				case 'sub-menu': this.subMenu = newVal; break;
 			}
 
-			if (this.route == this.value) this.getHost().setAttribute('active', '');
-			else this.getHost().removeAttribute('active');
+			if (this.route == this.value) {
+				this.getHost().setAttribute('active', '');
+
+				var siblings = this.getHost().parentNode.childNodes;
+				for (var i = 0; i < siblings.length; i++) {
+					if (siblings[i].tagName == 'RAZILO-MENU-LINKS') {
+						if (this.subMenu && siblings[i].getAttribute('sub-menu') == this.subMenu) siblings[i].setAttribute('active', '');
+						else siblings[i].removeAttribute('active');
+					}
+				}
+			} else {
+				this.getHost().removeAttribute('active');
+
+				var siblings = this.getHost().parentNode.childNodes;
+				for (var i = 0; i < siblings.length; i++) {
+					if (siblings[i].tagName == 'RAZILO-MENU-LINKS') {
+						if (this.subMenu && siblings[i].getAttribute('sub-menu') == this.subMenu) siblings[i].removeAttribute('active');
+						else siblings[i].setAttribute('active', '');
+					}
+				}
+			}
 		},
 
 		setRoute: function() {
-			this.getHost().value = this.route;
-			this.fireEvent('change');
+			// sub menus
+			var siblings = this.getHost().parentNode.childNodes;
+			for (var i = 0; i < siblings.length; i++) {
+				if (siblings[i].tagName == 'RAZILO-MENU-LINKS') {
+					if (this.subMenu && siblings[i].getAttribute('sub-menu') == this.subMenu) siblings[i].style.display = 'block';
+					else siblings[i].style.display = 'none';
+				}
+			}
+
+			// fire route
+			if (this.route) {
+				this.getHost().value = this.route;
+				this.fireEvent('change');
+			}
 		}
 	});
 </script>

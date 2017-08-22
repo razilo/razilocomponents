@@ -58,16 +58,20 @@
 	new RaziloComponent('razilo-message', {
 		timer: null,
 		delay: 4100,
+		icon: '',
+		message: '',
 
-		attached: function ()
+		created: function()
 		{
-			this.getHost().show = this.show();
-			this.getHost().hide = this.hide();
+			this.getHost().show = this.show.bind(this);
+			this.getHost().setIcon = this.setIcon.bind(this);
+			this.getHost().setMessage = this.setMessage.bind(this);
+			this.getHost().setColor = this.setColor.bind(this);
 		},
 
 		attributeChanged: function(name, oldVal, newVal)
 		{
-			if ((name == 'show' || name == 'toggle') && newVal !== null) {
+			if (name == 'show' && newVal !== null) {
 				this.fireEvent('show');
 
 				if (this.getHost().hasAttribute('animate-a')) {
@@ -80,21 +84,36 @@
 
 				this.getHost().removeAttribute('persist');
 				this.getHost().removeAttribute('show');
-				this.getHost().removeAttribute('toggle');
 				this.setTimer();
 			}
 
 			if (name == 'delay') this.setDelay(newVal);
 		},
 
-		show: function() {
-			this.getHost().setAttribute('show', '');
+		setIcon: function(icon) {
+			if (!!icon) this.icon = '<razilo-icon name="' + icon + '"></razilo-icon>';
+
+			this.getHost().querySelector('.-spacer').innerHTML = this.icon + ' ' + this.message;
+
+			return this.getHost();
 		},
 
-		hide: function()
-		{
-			this.getHost().removeAttribute('show');
-			this.getHost().removeAttribute('toggle');
+		setMessage: function(message) {
+			if (!!message) this.message = '<span>' + message + '</span>';
+
+			this.getHost().querySelector('.-spacer').innerHTML = this.icon + ' ' + this.message
+
+			return this.getHost();
+		},
+
+		setColor: function(color) {
+			if (!!color) this.getHost().setAttribute('color', color);
+
+			return this.getHost();
+		},
+
+		show: function() {
+			this.getHost().setAttribute('show', '');
 		},
 
 		setTimer: function() {

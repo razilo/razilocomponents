@@ -1,0 +1,145 @@
+<!--
+* UTComponents
+* razilo-request - Application request for ajay backend
+* @author Paul Smith (paul.smith)
+* @licence MIT
+-->
+
+<!-- STYLE - Encapsulate all css to tag name -->
+<style>
+	razilo-request { display: none !important; }
+</style>
+
+<!-- LOGIC -->
+<script>
+	new RaziloComponent('razilo-request', {
+		scheme: null,
+		baseUrl: null,
+
+		created: function()
+		{
+			this.setBaseUrl(this.getHost().getAttribute('base-url') || '');
+
+			this.getHost().setBaseUrl = this.setBaseUrl.bind(this);
+			this.getHost().ajax = this.ajax.bind(this);
+			this.getHost().get = this.get.bind(this);
+			this.getHost().put = this.put.bind(this);
+			this.getHost().post = this.post.bind(this);
+			this.getHost().delete = this.delete.bind(this);
+		},
+
+		ajax: function(type, url, data, headers) {
+			var scope = this;
+			type = type.toUpperCase();
+			var promise = new Promise(function(resolve, reject)
+			{
+				var XHR = XMLHttpRequest || ActiveXObject;
+				var xhrRequest = new XHR('MSXML2.XMLHTTP.3.0');
+				xhrRequest.open(type, url, true);
+				if (typeof headers !== 'undefined') {
+                    if (scope.getToken()) headers.Authorization = 'Bearer ' + scope.getToken();
+					for (var key in headers) xhrRequest.setRequestHeader(key, headers[key]);
+				}
+
+				xhrRequest.onreadystatechange = function ()
+				{
+					if (xhrRequest.readyState === 4)
+					{
+						// sort out response, sniff out json and convert
+						var output = xhrRequest.responseText;
+						if (typeof headers['Content-Type'] !== 'undefined' && headers['Content-Type'].indexOf('json') >= 0)
+						{
+							try { output = JSON.parse(xhrRequest.responseText); }
+							catch(e) {}
+						}
+
+						// if authorization save to localStorage to resend back in
+						if (!!this.getResponseHeader('Authorization')) scope.setToken(this.getResponseHeader('Authorization'));
+
+						// if expired, request token refresh and then re-process th eoriginal request
+						if (xhrRequest.status === 401 && output.status === 'expired') {
+							if (!output.data || !output.data.refreshUrl) throw('You must specify a refresh URL with a JWT expiration, please return data.refreshUrl to enable auto JWT refresh');
+
+							scope.get(output.data.refreshUrl).then(function() {
+								scope.ajax(type, url, data, headers).then(function(response) {
+									resolve({data: response.data, response: response.response});
+								}).catch(function(response) {
+									reject({data: response.data, response: response.response});
+								});
+							}).catch(function() {
+								reject({data: output, response: xhrRequest});
+							});
+						}
+						else if (xhrRequest.status === 200) resolve({data: output, response: xhrRequest});
+						else reject({data: output, response: xhrRequest});
+					}
+				};
+				xhrRequest.send(data);
+			});
+			return promise;
+		},
+
+		get: function(path, id) {
+			var headers = {'Content-Type': 'application/json', 'Cache-Control': 'no-cache'};
+			return this.ajax('GET', this.scheme + this.baseUrl + '/' + path + (typeof id !== 'undefined' && id !== null ? '/' + id : ''), null, headers);
+		},
+
+		put: function(path, data) {
+			var headers = {'Content-Type': 'application/json', 'Cache-Control': 'no-cache'};
+			try { data = JSON.stringify(data); }
+			catch(e) {}
+			return this.ajax('PUT', this.scheme + this.baseUrl + '/' + path, headers);
+		},
+
+		post: function(path, data) {
+			var headers = {'Content-Type': 'application/json', 'Cache-Control': 'no-cache'};
+			try { data = JSON.stringify(data); }
+			catch(e) {}
+			return this.ajax('POST', this.scheme + this.baseUrl + '/' + path, data, headers);
+		},
+
+		delete: function(path, id) {
+			var headers = {'Content-Type': 'application/json', 'Cache-Control': 'no-cache'};
+			return this.ajax('DELETE', this.scheme + this.baseUrl + '/' + path + (typeof id !== 'undefined' && id !== null ? '/' + id : ''), null, headers);
+		},
+
+		getToken: function()
+		{
+			if (localStorage[this.baseUrl + '.authorization'] !== undefined) return localStorage[this.baseUrl + '.authorization'];
+
+			return undefined;
+		},
+
+		setToken: function(value)
+		{
+			if (value === undefined) return false;
+
+			return localStorage[this.baseUrl + '.authorization'] = value.replace('Bearer ', '').replace('Refresh ', '');
+		},
+
+		deleteToken: function()
+		{
+			localStorage[this.baseUrl + '.authorization'] = '';
+		},
+
+		setBaseUrl: function(value)
+		{
+			if (value === undefined || value.length == 0) {
+				this.baseUrl = window.location.host;
+				this.scheme = 'http://';
+			} else if (value.indexOf('https://') == 0) {
+				if (value.charAt(value.length - 1) === '/') value = value.substring(0, value.length - 2);
+				this.baseUrl = value.replace('https://', '');
+				this.scheme = 'https://';
+			} else if (value.indexOf('http://') == 0) {
+				if (value.charAt(value.length - 1) === '/') value = value.substring(0, value.length - 2);
+				this.baseUrl = value.replace('http://', '');
+				this.scheme = 'http://';
+			} else {
+				if (value.charAt(value.length - 1) === '/') value = value.substring(0, value.length - 2);
+				this.baseUrl = value;
+				this.scheme = 'http://';
+			}
+		}
+	});
+</script>
