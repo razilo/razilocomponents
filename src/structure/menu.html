@@ -57,8 +57,6 @@
 			this.route = this.getHost().getAttribute('route') || this.route;
 			this.value = this.getHost().getAttribute('value') || this.value;
 			this.subMenu = this.getHost().getAttribute('sub-menu') || this.subMenu;
-
-
 		},
 
 		attributeChanged: function(name, oldVal, newVal)
@@ -73,41 +71,46 @@
 
 			if (this.route == this.value) {
 				this.getHost().setAttribute('active', '');
-
-				var siblings = this.getHost().parentNode.childNodes;
-				for (var i = 0; i < siblings.length; i++) {
-					if (siblings[i].tagName == 'RAZILO-MENU-LINKS') {
-						if (this.subMenu && siblings[i].getAttribute('sub-menu') == this.subMenu) siblings[i].setAttribute('active', '');
-						else siblings[i].removeAttribute('active');
-					}
-				}
+				this.removeParentsActive();
+				this.setParentsActive();
 			} else {
 				this.getHost().removeAttribute('active');
-
-				var siblings = this.getHost().parentNode.childNodes;
-				for (var i = 0; i < siblings.length; i++) {
-					if (siblings[i].tagName == 'RAZILO-MENU-LINKS') {
-						if (this.subMenu && siblings[i].getAttribute('sub-menu') == this.subMenu) siblings[i].removeAttribute('active');
-						else siblings[i].setAttribute('active', '');
-					}
-				}
 			}
+
 		},
 
 		setRoute: function() {
-			// sub menus
-			var siblings = this.getHost().parentNode.childNodes;
-			for (var i = 0; i < siblings.length; i++) {
-				if (siblings[i].tagName == 'RAZILO-MENU-LINKS') {
-					if (this.subMenu && siblings[i].getAttribute('sub-menu') == this.subMenu) siblings[i].style.display = 'block';
-					else siblings[i].style.display = 'none';
-				}
-			}
+			this.removeParentsActive();
+			this.setParentsActive();
 
 			// fire route
 			if (this.route) {
 				this.getHost().value = this.route;
 				this.fireEvent('change');
+			}
+		},
+
+		removeParentsActive: function() {
+			// look back until we find top
+			var ele = this.getHost();
+			for (var i = 0; i < 10; i++) {
+				if (ele.parentNode.tagName != 'RAZILO-MENU-LINKS') break;
+				ele = ele.parentNode;
+			}
+
+			// get all sub menu containers and clear them
+			var found = ele.querySelectorAll("razilo-menu-links");
+			if (found) for (var i = 0; i < found.length; i++) found[i].removeAttribute('active');
+		},
+
+		setParentsActive: function() {
+			// find lowest point
+			var ele = this.subMenu ? this.getHost().parentNode.querySelector("razilo-menu-links[sub-menu='" + this.subMenu + "']") : this.getHost().parentNode;
+
+			for (var i = 0; i < 10; i++) {
+				if (ele.tagName != 'RAZILO-MENU-LINKS') break;
+				ele.setAttribute('active', '');
+				ele = ele.parentNode;
 			}
 		}
 	});
