@@ -54,19 +54,25 @@
 <script>
 	new RaziloComponent('razilo-modal', {
 		heading: true,
+		deBounce: true,
 
 		attached: function ()
 		{
 			this.getHost().show = this.show();
 			this.getHost().hide = this.hide();
+			setTimeout(function () { this.deBounce = false }.bind(this), 1); // stop firing on load
 		},
 
 		attributeChanged: function(name, oldVal, newVal)
 		{
+
 			if (name == 'show' || name == 'toggle')
 			{
+				if (this.deBounce) return;
+
 				if (newVal !== null)
 				{
+
 					this.fireEvent('show');
 					if (this.getHost().querySelector('content[select="heading"]')) this.heading = false;
 					window.addEventListener('resize', this.resize.bind(this));

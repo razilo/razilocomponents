@@ -125,7 +125,7 @@
 					{
 						this.showModal = true;
 						this.mode = 'day';
-						this.load();
+						setTimeout(function () { this.load() }.bind(this), 1);
 					}
 				break;
 			}
